@@ -1,0 +1,51 @@
+[project]
+name = "sklearo"
+description = "A versatile Python package featuring scikit-learn like transformers for feature preprocessing, compatible with all kind of dataframes thanks to narwhals."
+version = "0.1.0"
+keywords = ["feature preprocessing", "scikit-learn", "machine learning"]
+authors = [
+    { name = "Claudio Salvatore Arcidiacono", email = "author@email.com" },
+]
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = ["narwhals", "pydantic"]
+
+[project.optional-dependencies]
+dev = ["black", "ruff", "pre-commit", "pytest", "polars"]
+doc = ["mkdocs", "mkdocs-material", "mkdocstrings[python]", "mkdocs-jupyter"]
+build = ["build", "twine"]
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
+
+[project.urls]
+"Homepage" = "https://github.com/ClaudioSalvatoreArcidiacono/sklearo"
+"Documentation" = "https://claudiosalvatorearcidiacono.github.io/sklearo/"
+"Bug Tracker" = "https://github.com/ClaudioSalvatoreArcidiacono/sklearo/issues"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.flake8]
+max-line-length = 88
