@@ -146,7 +146,7 @@ class WOEEncoder:
                 perc_bads=nw.col("n_bads") / total_bads,
             )
             .with_columns(
-                dist_ratio=nw.col("perc_bads") / nw.col("perc_goods")
+                dist_ratio=nw.col("perc_goods") / nw.col("perc_bads")
             )
             .select(x.name, "n_goods", "n_bads", "dist_ratio")
             .rows()
