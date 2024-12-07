@@ -1,0 +1,45 @@
+site_name: sklearo
+site_url: https://claudiosalvatorearcidiacono.github.io/sklearo/
+
+theme:
+  name: material
+  palette:
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+
+plugins:
+- search
+- mkdocs-jupyter:
+    no_prompts: True
+- mkdocstrings:
+    handlers:
+      python:
+        options:
+          docstring_style: google
+          merge_init_into_class: true
+          docstring_section_style: list
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
