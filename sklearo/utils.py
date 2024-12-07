@@ -1,10 +1,9 @@
+import inspect
+import re
 from typing import Sequence
 
-import re
 import narwhals as nw
 from narwhals.typing import IntoFrameT
-import inspect
-
 
 
 def select_columns_by_regex_pattern(df: IntoFrameT, pattern: str):

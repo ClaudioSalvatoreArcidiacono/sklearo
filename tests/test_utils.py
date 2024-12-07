@@ -1,13 +1,13 @@
+import narwhals as nw
 import pandas as pd
 import polars as pl
 import pytest
-import narwhals as nw
+
 from sklearo.utils import (
+    select_columns,
     select_columns_by_regex_pattern,
     select_columns_by_types,
-    select_columns,
 )
-
 
 select_columns_by_regex_pattern = nw.narwhalify(select_columns_by_regex_pattern)
 select_columns_by_types = nw.narwhalify(select_columns_by_types)
@@ -71,7 +71,6 @@ class TestSelectColumns:
         df = DataFrame(sample_data)
         selected_columns = list(select_columns(df, ()))
         assert selected_columns == []
-
 
     def test_select_columns_invalid_type(self, sample_data, DataFrame):
         df = DataFrame(sample_data)

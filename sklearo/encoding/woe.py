@@ -1,14 +1,14 @@
+import math
+import warnings
+from collections import defaultdict
+from typing import Any, Literal, Sequence
+
 import narwhals as nw
 from narwhals.typing import IntoFrameT, IntoSeriesT
-import warnings
-import math
-from typing import Sequence, Literal, Any
-
-from collections import defaultdict
-
 from pydantic import validate_call
+
 from sklearo.utils import select_columns
-from sklearo.validation import check_X_y, check_if_fitted
+from sklearo.validation import check_if_fitted, check_X_y
 
 
 class WOEEncoder:
@@ -355,8 +355,10 @@ class WOEEncoder:
         for column, mapping in self.encoding_map_.items():
             uniques = X[column].unique()
             unseen_cats = uniques.filter(
-                (~uniques.is_in(next(iter(mapping.values())).keys())
-                & ~uniques.is_null())
+                (
+                    ~uniques.is_in(next(iter(mapping.values())).keys())
+                    & ~uniques.is_null()
+                )
             ).to_list()
             if unseen_cats:
                 unseen_per_col[column] = unseen_cats
