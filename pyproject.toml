@@ -17,7 +17,16 @@ classifiers = [
 dependencies = ["narwhals", "pydantic"]
 
 [project.optional-dependencies]
-dev = ["black", "ruff", "pre-commit", "pytest", "polars"]
+dev = [
+    "black",
+    "ruff",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "polars",
+    "pandas",
+    "numpy",
+]
 doc = ["mkdocs", "mkdocs-material", "mkdocstrings[python]", "mkdocs-jupyter"]
 build = ["build", "twine"]
 

@@ -6,8 +6,9 @@ from typing import Sequence, Literal, Any
 
 from collections import defaultdict
 
-from pydantic import validate_arguments
+from pydantic import validate_call
 from sklearo.utils import select_columns
+from sklearo.validation import check_X_y, check_if_fitted
 
 
 class WOEEncoder:
@@ -50,38 +51,45 @@ class WOEEncoder:
 
     Args:
         columns (str, list[str], list[nw.typing.DTypes]): list of columns to encode.
-            If a single string is passed instead, it is treated as a regular expression pattern to
-            match column names. If a list of [`narwhals.typing.DTypes`](https://narwhals-dev.github.io/narwhals/api-reference/dtypes/)  # noqa: E501
-            is passed, it will select all columns matching the specified dtype.
+            - If a list of strings is passed, it is treated as a list of column names to encode.
+            - If a single string is passed instead, it is treated as a regular expression pattern to
+                match column names.
+            - If a list of [`narwhals.typing.DTypes`](https://narwhals-dev.github.io/narwhals/api-reference/dtypes/)  # noqa: E501
+                is passed, it will select all columns matching the specified dtype.
             Defaults to `[narwhals.Categorical, narwhals.String]`, meaning that all categorical
             and string columns are selected by default.
         underrepresented_categories (str): Strategy to handle underrepresented categories.
             Underrepresented categories in this context are categories that are never associated
             with one of the target classes. In this case the WOE is undefined (mathematically it
-            would be either -inf or inf). If `'raise'`, an error is raised when a category is
-            underrepresented. If `'fill'`, the underrepresented categories are encoded using the
-            fill_values_underrepresented values. Optional, Defaults to `'raise'`.
+            would be either -inf or inf).
+            - If `'raise'`, an error is raised when a category is underrepresented.
+            - If `'fill'`, the underrepresented categories are encoded using the
+                fill_values_underrepresented values.
+            Optional, Defaults to `'raise'`.
         fill_values_underrepresented (list[int, float]): Fill values to use for underrepresented
             categories. The first value is used when the category has no events (e.g. defaults)
             and the second value is used when the category has no non-events (e.g. non defaults).
             Only used when `underrepresented_categories='fill'`. Optional, Defaults to
             `(-999.0, 999.0)`.
-        unseen (str): Strategy to handle categories that appear during the `transform` step but where
-            never encountered in the `fit` step. If `'raise'`, an error is raised when
-            unseen categories are found. If `'ignore'`, the unseen categories are encoded with the
-            fill_value_unseen. Defaults to `'raise'`.
+        unseen (str): Strategy to handle categories that appear during the `transform` step but
+            where never encountered in the `fit` step.
+            - If `'raise'`, an error is raised when unseen categories are found.
+            - If `'ignore'`, the unseen categories are encoded with the fill_value_unseen.
+            Defaults to `'raise'`.
         fill_value_unseen (int, float): Fill value to use for unseen categories. Only used when
             `unseen='ignore'`. Optional, Defaults to `0.0`.
-        missing_values (str): Strategy to handle missing values. If `'encode'`, missing values are
-            initially replaced with `'MISSING'` and the WOE is computed as if it were a regular
-            category. If `'ignore'`, missing values are left as is. If `'raise'`, an error is
-            raised when missing values are found. Defaults to `'encode'`.
+        missing_values (str): Strategy to handle missing values.
+            - If `'encode'`, missing values are initially replaced with `'MISSING'` and the WOE is
+            computed as if it were a regular category.
+            - If `'ignore'`, missing values are left as is. If `'raise'`, an error is raised when
+            missing values are found. Defaults to `'encode'`.
 
     Attributes:
         columns_ (list): List of columns to be encoded, learned during fit.
         encoding_map_ (dict): Dictionary mapping columns to their WOE values, learned during fit.
         is_binary_target_ (bool): Whether the target variable is binary (exactly 0 or 1) or not,
         learned during fit.
+        feature_names_in_ (list): List of feature names seen during fit.
 
     Examples:
         ```python
@@ -109,7 +117,7 @@ class WOEEncoder:
         ```
     """
 
-    @validate_arguments(config=dict(arbitrary_types_allowed=True))
+    @validate_call(config=dict(arbitrary_types_allowed=True))
     def __init__(
         self,
         columns: Sequence[nw.typing.DTypes | str] | str = (
@@ -136,12 +144,13 @@ class WOEEncoder:
         if self.missing_values == "ignore":
             return X
         if self.missing_values == "raise":
-            if X[self.columns_].null_count() > 0:
+            if max(X[self.columns_].null_count().row(0)) > 0:
                 raise ValueError(
                     f"Some columns have missing values. "
                     "Please handle missing values before encoding or set "
                     "missing_values to either 'ignore' or 'encode'."
                 )
+            return X
         if self.missing_values == "encode":
             # fillna does not work with categorical columns, so we use this
             # workaround
@@ -220,7 +229,7 @@ class WOEEncoder:
         woe_dict_per_category = defaultdict(dict)
         underrepresented_category_per_class = list()
 
-        for category in sorted(unique_categories):
+        for category in sorted(cat for cat in unique_categories if cat is not None):
             for class_ in sorted(unique_classes):
                 category_class_info = categories_class_info_as_dict[category].get(
                     class_, {}
@@ -276,23 +285,29 @@ class WOEEncoder:
         if underrepresented_category_per_class:
             if self.underrepresented_categories == "raise":
                 raise ValueError(
-                    f"Underrepresented categories {underrepresented_category_per_class} found for the"
-                    f"column {x.name}. "
-                    "Please handle underrepresented categories for example by using a RareLabelEncoder. "
-                    "Alternatively, set underrepresented_categories to 'fill'."
+                    f"Underrepresented categories {underrepresented_category_per_class} found for "
+                    f"the column {x.name}. "
+                    "Please handle underrepresented categories for example by using a "
+                    "RareLabelEncoder. Alternatively, set underrepresented_categories to 'fill'."
                 )
             else:  # Fill
                 warnings.warn(
                     f"Underrepresented categories found for the column {x.name}. "
-                    "Please handle underrepresented categories for example by using a RareLabelEncoder. "
-                    "These categories will be encoded using the fill value as: \n"
+                    "Please handle underrepresented categories for example by using a "
+                    "RareLabelEncoder. These categories will be encoded using the fill value as: \n"
                     f"{underrepresented_category_per_class}."
                 )
         return dict(woe_dict_per_category)
 
     @nw.narwhalify
+    @check_X_y
     def fit(self, X: IntoFrameT, y: IntoSeriesT) -> "WOEEncoder":
-        """Fit the encoder."""
+        """Fit the encoder.
+
+        Args:
+            X (DataFrame): The input data.
+            y (Series): The target variable.
+        """
 
         self.columns_ = list(select_columns(X, self.columns))
         X = self._handle_missing_values(X)
@@ -316,22 +331,32 @@ class WOEEncoder:
                     self.is_binary_target_ = True
                 else:
                     self.is_binary_target_ = False
+        else:
+            self.is_binary_target_ = False
 
         for column in self.columns_:
             self.encoding_map_[column] = self._calculate_woe(
                 X[column], y, unique_classes
             )
+
+        self.feature_names_in_ = list(X.columns)
         return self
 
     @nw.narwhalify
+    @check_if_fitted
     def transform(self, X: IntoFrameT) -> IntoFrameT:
-        """Transform the data."""
+        """Transform the data.
+
+        Args:
+            X (DataFrame): The input data.
+        """
         X = self._handle_missing_values(X)
         unseen_per_col = {}
         for column, mapping in self.encoding_map_.items():
             uniques = X[column].unique()
             unseen_cats = uniques.filter(
-                ~uniques.is_in(next(iter(mapping.values())).keys())
+                (~uniques.is_in(next(iter(mapping.values())).keys())
+                & ~uniques.is_null())
             ).to_list()
             if unseen_cats:
                 unseen_per_col[column] = unseen_cats
@@ -366,3 +391,15 @@ class WOEEncoder:
             for column, classes_mapping in self.encoding_map_.items()
             for class_, mapping in classes_mapping.items()
         )
+
+    @check_if_fitted
+    def get_feature_names_out(self) -> list[str]:
+        """Get the feature names after encoding."""
+        if self.is_binary_target_:
+            return self.feature_names_in_
+        else:
+            return self.feature_names_in_ + [
+                f"{column}_WOE_class_{class_}"
+                for column, classes_mapping in self.encoding_map_.items()
+                for class_ in classes_mapping
+            ]
