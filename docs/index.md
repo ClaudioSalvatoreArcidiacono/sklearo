@@ -1,10 +1,6 @@
-[![pytest](https://github.com/ClaudioSalvatoreArcidiacono/sklearo/workflows/Tests/badge.svg)](https://github.com/ClaudioSalvatoreArcidiacono/sklearo/actions?query=workflow%3A%22Tests%22)
- [![PyPI](https://img.shields.io/pypi/v/sklearo)](#)
- [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://claudiosalvatorearcidiacono.github.io/sklearo/)
+# Homepage
 
-# sklearo
-
-> */sklɛro/*
+## Sklearo
 
 A versatile Python package featuring scikit-learn like transformers for feature preprocessing, compatible with all kind of DataFrames thanks to narwhals.
 

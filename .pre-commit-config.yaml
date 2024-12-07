@@ -17,13 +17,3 @@ repos:
       rev: 24.4.2
       hooks:
           - id: black
-
-    - repo: local
-      hooks:
-        - id: check-readme-index
-          name: check-readme-index
-          entry: bash -c 'echo "Copying content from README.md to docs/API/index.md"; sed -n "/# sklearo/,\$p" README.md > docs/API/index.md'
-          language: system
-          types: [markdown]
-          files: README.md
-          pass_filenames: false
