@@ -22,7 +22,7 @@ repos:
       hooks:
         - id: check-readme-index
           name: check-readme-index
-          entry: bash -c 'diff <(head -n 1 README.md) <(head -n 1 docs/API/index.md) || { echo "README.md and docs/API/index.md differ"; sed -i "1s/.*/# sklearo/" README.md; sed -i "1s/.*/# Homepage/" docs/API/index.md; }'
+          entry: bash -c 'echo "Copying content from README.md to docs/API/index.md"; sed -n "/# sklearo/,\$p" README.md > docs/API/index.md'
           language: system
           types: [python]
           pass_filenames: false
