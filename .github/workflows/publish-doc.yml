@@ -5,6 +5,8 @@ on:
     - '*'
 jobs:
   build-n-publish:
+    permissions:
+      contents: write
     name: Update Documentation
     runs-on: ubuntu-latest
     steps:
