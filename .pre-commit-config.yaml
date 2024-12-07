@@ -24,5 +24,6 @@ repos:
           name: check-readme-index
           entry: bash -c 'echo "Copying content from README.md to docs/API/index.md"; sed -n "/# sklearo/,\$p" README.md > docs/API/index.md'
           language: system
-          types: [python]
+          types: [markdown]
+          files: README.md
           pass_filenames: false
