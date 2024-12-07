@@ -7,11 +7,12 @@ import narwhals as nw
 from narwhals.typing import IntoFrameT, IntoSeriesT
 from pydantic import validate_call
 
+from sklearo.base import BaseTransformer
 from sklearo.utils import select_columns
 from sklearo.validation import check_if_fitted, check_X_y
 
 
-class WOEEncoder:
+class WOEEncoder(BaseTransformer):
     """Weight of Evidence (WOE) Encoder with support for multiclass classification.
 
     This class provides functionality to encode categorical features using the Weight of Evidence

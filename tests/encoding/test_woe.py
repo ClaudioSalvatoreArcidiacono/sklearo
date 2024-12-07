@@ -479,3 +479,15 @@ class TestWOEEncoder:
         encoder = WOEEncoder()
         with pytest.raises(ValueError, match="y contains missing values."):
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+
+    def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
+        binary_class_data_df = DataFrame(binary_class_data)
+
+        encoder = WOEEncoder()
+        transformed = encoder.fit_transform(
+            binary_class_data_df[["category"]], binary_class_data_df["target"]
+        )
+
+        # Ensure that the transformed data is not None and has the expected shape
+        assert transformed is not None
+        assert transformed.shape[0] == binary_class_data_df.shape[0]
