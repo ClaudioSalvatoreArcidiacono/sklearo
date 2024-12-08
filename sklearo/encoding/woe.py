@@ -52,45 +52,53 @@ class WOEEncoder(BaseTransformer):
 
     Args:
         columns (str, list[str], list[nw.typing.DTypes]): list of columns to encode.
+
             - If a list of strings is passed, it is treated as a list of column names to encode.
             - If a single string is passed instead, it is treated as a regular expression pattern to
                 match column names.
-            - If a list of [`narwhals.typing.DTypes`](https://narwhals-dev.github.io/narwhals/api-reference/dtypes/)  # noqa: E501
+            - If a list of [`narwhals.typing.DTypes`](https://narwhals-dev.github.io/narwhals/api-reference/dtypes/)
                 is passed, it will select all columns matching the specified dtype.
+
             Defaults to `[narwhals.Categorical, narwhals.String]`, meaning that all categorical
             and string columns are selected by default.
+
         underrepresented_categories (str): Strategy to handle underrepresented categories.
             Underrepresented categories in this context are categories that are never associated
             with one of the target classes. In this case the WOE is undefined (mathematically it
             would be either -inf or inf).
+
             - If `'raise'`, an error is raised when a category is underrepresented.
             - If `'fill'`, the underrepresented categories are encoded using the
                 fill_values_underrepresented values.
-            Optional, Defaults to `'raise'`.
-        fill_values_underrepresented (list[int, float]): Fill values to use for underrepresented
-            categories. The first value is used when the category has no events (e.g. defaults)
-            and the second value is used when the category has no non-events (e.g. non defaults).
-            Only used when `underrepresented_categories='fill'`. Optional, Defaults to
-            `(-999.0, 999.0)`.
+
+        fill_values_underrepresented (list[int, float, None]): Fill values to use for
+            underrepresented categories. The first value is used when the category has no events
+            (e.g. defaults) and the second value is used when the category has no non-events (e.g.
+            non defaults). Only used when `underrepresented_categories='fill'`.
+
         unseen (str): Strategy to handle categories that appear during the `transform` step but
             where never encountered in the `fit` step.
+
             - If `'raise'`, an error is raised when unseen categories are found.
             - If `'ignore'`, the unseen categories are encoded with the fill_value_unseen.
-            Defaults to `'raise'`.
-        fill_value_unseen (int, float): Fill value to use for unseen categories. Only used when
-            `unseen='ignore'`. Optional, Defaults to `0.0`.
+
+        fill_value_unseen (int, float, None): Fill value to use for unseen categories. Only used when
+            `unseen='ignore'`.
+
         missing_values (str): Strategy to handle missing values.
+
             - If `'encode'`, missing values are initially replaced with `'MISSING'` and the WOE is
             computed as if it were a regular category.
             - If `'ignore'`, missing values are left as is. If `'raise'`, an error is raised when
-            missing values are found. Defaults to `'encode'`.
+            missing values are found.
 
     Attributes:
-        columns_ (list): List of columns to be encoded, learned during fit.
-        encoding_map_ (dict): Dictionary mapping columns to their WOE values, learned during fit.
+        columns_ (list[str]): List of columns to be encoded, learned during fit.
+        encoding_map_ (dict[str, dict[str, float]]): Nested dictionary mapping columns to their WOE
+            values for each class, learned during fit.
         is_binary_target_ (bool): Whether the target variable is binary (exactly 0 or 1) or not,
-        learned during fit.
-        feature_names_in_ (list): List of feature names seen during fit.
+            learned during fit.
+        feature_names_in_ (list[str]): List of feature names seen during fit.
 
     Examples:
         ```python
@@ -126,7 +134,7 @@ class WOEEncoder(BaseTransformer):
             nw.String,
         ),
         underrepresented_categories: Literal["raise", "fill"] = "raise",
-        fill_values_underrepresented: Sequence[int | float | None] | None = (
+        fill_values_underrepresented: Sequence[int | float | None] = (
             -999.0,
             999.0,
         ),
