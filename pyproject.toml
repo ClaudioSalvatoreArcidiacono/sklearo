@@ -1,7 +1,7 @@
 [project]
 name = "sklearo"
 description = "A versatile Python package featuring scikit-learn like transformers for feature preprocessing, compatible with all kind of dataframes thanks to narwhals."
-version = "0.1.0"
+version = "0.1.1"
 keywords = ["feature preprocessing", "scikit-learn", "machine learning"]
 authors = [
     { name = "Claudio Salvatore Arcidiacono", email = "author@email.com" },
