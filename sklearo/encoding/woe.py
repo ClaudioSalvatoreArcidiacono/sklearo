@@ -89,8 +89,8 @@ class WOEEncoder(BaseTransformer):
 
             - If `'encode'`, missing values are initially replaced with `'MISSING'` and the WOE is
             computed as if it were a regular category.
-            - If `'ignore'`, missing values are left as is. If `'raise'`, an error is raised when
-            missing values are found.
+            - If `'ignore'`, missing values are left as is.
+            - If `'raise'`, an error is raised when missing values are found.
 
     Attributes:
         columns_ (list[str]): List of columns to be encoded, learned during fit.
@@ -386,7 +386,7 @@ class WOEEncoder(BaseTransformer):
                     f"These categories will be encoded as {self.fill_value_unseen}."
                 )
 
-        return X.with_columns(
+        X_out = X.with_columns(
             nw.col(column)
             .replace_strict(
                 {
@@ -403,13 +403,22 @@ class WOEEncoder(BaseTransformer):
             for class_, mapping in classes_mapping.items()
         )
 
+        # In case of binary target, the original columns are replaced with the encoded columns.
+        # If it is not a binary target, the original columns need to be dropped before returning.
+        if not self.is_binary_target_:
+            X_out = X_out.drop(*self.columns_)
+
+        return X_out
+
     @check_if_fitted
     def get_feature_names_out(self) -> list[str]:
         """Get the feature names after encoding."""
         if self.is_binary_target_:
             return self.feature_names_in_
         else:
-            return self.feature_names_in_ + [
+            return [
+                feat for feat in self.feature_names_in_ if feat not in self.columns_
+            ] + [
                 f"{column}_WOE_class_{class_}"
                 for column, classes_mapping in self.encoding_map_.items()
                 for class_ in classes_mapping

@@ -77,7 +77,7 @@ class TestWOEEncoder:
 
         assert (
             encoder.get_feature_names_out()
-            == ["target", "target_WOE_class_B"]
+            == ["target_WOE_class_B"]
             == list(transformed_data.columns)
         )
         np.testing.assert_allclose(
@@ -115,7 +115,7 @@ class TestWOEEncoder:
 
         assert (
             encoder.get_feature_names_out()
-            == ["category", "category_WOE_class_2"]
+            == ["category_WOE_class_2"]
             == list(transformed_data.columns)
         )
 
@@ -212,14 +212,10 @@ class TestWOEEncoder:
         transformed = encoder.transform(multi_class_data[["category"]])
 
         assert list(transformed.columns) == [
-            "category",
             "category_WOE_class_1",
             "category_WOE_class_2",
             "category_WOE_class_3",
         ]
-        assert (
-            transformed["category"].to_list() == multi_class_data["category"].to_list()
-        )
 
         np.testing.assert_allclose(
             transformed["category_WOE_class_1"],
@@ -393,7 +389,6 @@ class TestWOEEncoder:
             list(transformed.columns)
             == [
                 "num_1",
-                "category",
                 "num_2",
                 "category_WOE_class_1",
                 "category_WOE_class_2",
