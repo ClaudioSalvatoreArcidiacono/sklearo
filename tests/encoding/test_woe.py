@@ -34,7 +34,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is True
+        assert encoder.is_zero_one_target_ is True
 
     def test_woe_encoder_fit_multiclass_non_int_target(
         self, binary_class_data, DataFrame
@@ -45,7 +45,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["target"]
         assert "target" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is False
+        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(binary_class_data[["target"]])
         np.testing.assert_allclose(
@@ -71,7 +71,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["target"]
         assert "target" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is False
+        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(multi_class_data[["target"]])
 
@@ -109,7 +109,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is False
+        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(binary_class_data[["category"]])
 
@@ -138,7 +138,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is True
+        assert encoder.is_zero_one_target_ is True
 
     def test_woe_encoder_fit_with_target_in_X_multi_class(
         self, multi_class_data, DataFrame
@@ -153,7 +153,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is False
+        assert encoder.is_zero_one_target_ is False
 
     def test_woe_encoder_fit_with_target_in_X_multi_class_raise_underrepresented(
         self, multi_class_data, DataFrame
@@ -181,7 +181,7 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_binary_target_ is False
+        assert encoder.is_zero_one_target_ is False
 
     def test_woe_encoder_transform_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)

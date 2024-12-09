@@ -1,5 +1,7 @@
 from functools import wraps
 
+from sklearo.utils import infer_type_of_target
+
 
 def check_X_y(func):
     @wraps(func)
@@ -32,3 +34,22 @@ def check_if_fitted(func):
         return func(self, *args, **kwargs)
 
     return wrapper
+
+
+def check_type_of_target(*allowed_types_of_target):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, X, y, *args, **kwargs):
+            inferred_type_of_target = infer_type_of_target(y)
+            if inferred_type_of_target not in allowed_types_of_target:
+                raise ValueError(
+                    f"{self.__class__.__name__} supports the following types of target: "
+                    f"{allowed_types_of_target}, but the inferred type of target was "
+                    f"type_of_target={inferred_type_of_target}. To know more on how target is "
+                    "inferred please refer to the documentation of sklearo.utils.type_of_target."
+                )
+            return func(self, X, y, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

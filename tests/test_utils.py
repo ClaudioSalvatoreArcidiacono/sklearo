@@ -4,6 +4,7 @@ import polars as pl
 import pytest
 
 from sklearo.utils import (
+    infer_type_of_target,
     select_columns,
     select_columns_by_regex_pattern,
     select_columns_by_types,
@@ -76,3 +77,32 @@ class TestSelectColumns:
         df = DataFrame(sample_data)
         with pytest.raises(ValueError, match="Invalid columns type"):
             list(select_columns(df, [1, 2]))
+
+
+@pytest.mark.parametrize("Series", [pd.Series, pl.Series], ids=["pandas", "polars"])
+class TestTypeOfTarget:
+
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            ([1, 2, 3], "multiclass"),
+            ([1, 2, 1], "binary"),
+            ([1, 2, 4], "multiclass"),
+            (["a", "b", "c"], "multiclass"),
+            (["a", "b", "a"], "binary"),
+            ([1.0, 2.0, 3.5], "continuous"),
+            ([1.0, 2.0, 4.0], "continuous"),
+            ([1.0, 3.5, 3.5], "continuous"),
+            ([1.0, 2.0, 3.0], "multiclass"),
+            ([1.0, 2.0, 1.0], "binary"),
+            ([1.0, 4.0, 4.0], "binary"),
+        ],
+    )
+    def test_type_of_target(self, Series, data, expected):
+        series = Series(data)
+        assert infer_type_of_target(series) == expected
+
+    def test_type_of_target_unknown(self, Series):
+        data = [None, None, None]
+        series = Series(data)
+        assert infer_type_of_target(series) == "unknown"

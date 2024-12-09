@@ -41,9 +41,6 @@ plugins:
           show_root_full_path: true
           show_symbol_type_heading: true
           show_symbol_type_toc: true
-          # signature_crossrefs: true
-          # show_signature_annotations: true
-          # summary: true
 
 markdown_extensions:
   - pymdownx.highlight:
