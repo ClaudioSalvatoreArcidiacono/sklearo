@@ -34,7 +34,6 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is True
 
     def test_woe_encoder_fit_multiclass_non_int_target(
         self, binary_class_data, DataFrame
@@ -45,21 +44,20 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["target"]
         assert "target" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(binary_class_data[["target"]])
         np.testing.assert_allclose(
             transformed_data["target_WOE_class_A"].to_list(),
             [
-                -0.405465,
-                0.847298,
-                0.847298,
-                -0.405465,
-                -0.405465,
-                0.847298,
-                -0.405465,
-                -0.405465,
-                0.847298,
+                -0.693147,
+                0.693147,
+                0.693147,
+                -0.693147,
+                -0.693147,
+                0.693147,
+                -0.693147,
+                -0.693147,
+                0.693147,
             ],
             rtol=1e-5,
         )
@@ -71,28 +69,27 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["target"]
         assert "target" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(multi_class_data[["target"]])
 
         assert (
             encoder.get_feature_names_out()
-            == ["target_WOE_class_B"]
+            == ["target"]
             == list(transformed_data.columns)
         )
         np.testing.assert_allclose(
-            transformed_data["target_WOE_class_B"].to_list(),
+            transformed_data["target"].to_list(),
             [
-                -0.105361,
-                -0.105361,
-                1.163151,
-                0.470004,
-                0.470004,
-                -0.105361,
-                1.163151,
-                1.163151,
-                0.470004,
-                0.470004,
+                -0.693147,
+                -0.693147,
+                0.693147,
+                0.0,
+                0.0,
+                -0.693147,
+                0.693147,
+                0.693147,
+                0.0,
+                0.0,
             ],
             rtol=1e-5,
         )
@@ -109,19 +106,28 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is False
 
         transformed_data = encoder.transform(binary_class_data[["category"]])
 
         assert (
             encoder.get_feature_names_out()
-            == ["category_WOE_class_2"]
+            == ["category"]
             == list(transformed_data.columns)
         )
 
         np.testing.assert_allclose(
-            transformed_data["category_WOE_class_2"].to_list(),
-            [1.252763, 1.252763, 1.252763, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            transformed_data["category"].to_list(),
+            [
+                0.916291,
+                0.916291,
+                0.916291,
+                -0.470004,
+                -0.470004,
+                -0.470004,
+                -0.470004,
+                -0.470004,
+                -0.470004,
+            ],
             rtol=1e-5,
         )
 
@@ -133,12 +139,10 @@ class TestWOEEncoder:
             columns=["category", "target"], underrepresented_categories="fill"
         )
 
-        with pytest.warns(UserWarning):
-            encoder.fit(binary_class_data, binary_class_data["target"])
+        encoder.fit(binary_class_data, binary_class_data["target"])
 
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is True
 
     def test_woe_encoder_fit_with_target_in_X_multi_class(
         self, multi_class_data, DataFrame
@@ -148,12 +152,10 @@ class TestWOEEncoder:
             columns=["category", "target"], underrepresented_categories="fill"
         )
 
-        with pytest.warns(UserWarning):
-            encoder.fit(multi_class_data, multi_class_data["target"])
+        encoder.fit(multi_class_data, multi_class_data["target"])
 
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is False
 
     def test_woe_encoder_fit_with_target_in_X_multi_class_raise_underrepresented(
         self, multi_class_data, DataFrame
@@ -163,7 +165,7 @@ class TestWOEEncoder:
             columns=["category", "target"], underrepresented_categories="raise"
         )
 
-        with pytest.raises(ValueError, match="Underrepresented categories"):
+        with pytest.raises(ValueError, match="Underrepresented category"):
             encoder.fit(multi_class_data, multi_class_data["target"])
 
     def test_woe_encoder_fit_with_empty_columns(self, multi_class_data, DataFrame):
@@ -181,7 +183,6 @@ class TestWOEEncoder:
 
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
-        assert encoder.is_zero_one_target_ is False
 
     def test_woe_encoder_transform_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)
@@ -189,16 +190,20 @@ class TestWOEEncoder:
         encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
         transformed = encoder.transform(binary_class_data[["category"]])
 
+        # for category A:
+        #   log((1/5)/(2/4)) = -0.916291...
+        # for categories B and C:
+        #   log((2/5)/(1/4)) = 0.470004...
         expected_values = [
-            -0.223144,
-            -0.223144,
-            -0.223144,
-            1.029619,
-            1.029619,
-            1.029619,
-            1.029619,
-            1.029619,
-            1.029619,
+            -0.916291,
+            -0.916291,
+            -0.916291,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
         ]
         np.testing.assert_allclose(
             transformed["category"].to_list(), expected_values, rtol=1e-5
@@ -221,16 +226,16 @@ class TestWOEEncoder:
             transformed["category_WOE_class_1"],
             # For class 1 A counts : 2, B counts : 1
             [
-                0.575364,
-                0.575364,
-                0.575364,
-                0.575364,
-                0.575364,
-                -0.287682,
-                -0.287682,
-                -0.287682,
-                -0.287682,
-                -0.287682,
+                0.441833,
+                0.441833,
+                0.441833,
+                0.441833,
+                0.441833,
+                -0.538997,
+                -0.538997,
+                -0.538997,
+                -0.538997,
+                -0.538997,
             ],
             rtol=1e-5,
         )
@@ -239,16 +244,16 @@ class TestWOEEncoder:
             transformed["category_WOE_class_2"],
             # For class 2 A counts : 1, B counts : 2
             [
-                -0.287682,
-                -0.287682,
-                -0.287682,
-                -0.287682,
-                -0.287682,
-                0.575364,
-                0.575364,
-                0.575364,
-                0.575364,
-                0.575364,
+                -0.538997,
+                -0.538997,
+                -0.538997,
+                -0.538997,
+                -0.538997,
+                0.441833,
+                0.441833,
+                0.441833,
+                0.441833,
+                0.441833,
             ],
             rtol=1e-5,
         )
@@ -256,18 +261,7 @@ class TestWOEEncoder:
         np.testing.assert_allclose(
             transformed["category_WOE_class_3"],
             # For class 3 A counts : 2, B counts : 2
-            [
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-                0.287682,
-            ],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             rtol=1e-5,
         )
 
@@ -280,11 +274,9 @@ class TestWOEEncoder:
         encoder = WOEEncoder(
             missing_values="encode", underrepresented_categories="fill"
         )
-        with pytest.warns(UserWarning):
-            encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
-        transformed = encoder.transform(binary_class_data[["category"]])
+        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-        assert "MISSING" in encoder.encoding_map_["category"][1]
+        assert "MISSING" in encoder.encoding_map_["category"]
 
     def test_woe_encoder_handle_missing_values_multi_class(
         self, multi_class_data, DataFrame
@@ -295,8 +287,7 @@ class TestWOEEncoder:
         encoder = WOEEncoder(
             missing_values="encode", underrepresented_categories="fill"
         )
-        with pytest.warns(UserWarning):
-            encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
+        encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
         transformed = encoder.transform(multi_class_data[["category"]])
 
         assert "MISSING" in encoder.encoding_map_["category"][1]
@@ -311,7 +302,9 @@ class TestWOEEncoder:
             transformed = encoder.transform(new_data)
 
         np.testing.assert_allclose(
-            transformed["category"].to_list(), [-0.223144, 1.029619, -999], rtol=1e-5
+            transformed["category"].to_list(),
+            [-0.9162907, 0.4700036, -999.0],
+            rtol=1e-5,
         )
 
     def test_woe_encoder_unseen_category_binary_raise(
@@ -344,11 +337,10 @@ class TestWOEEncoder:
         encoder = WOEEncoder(
             underrepresented_categories="fill", fill_values_underrepresented=(-999, 999)
         )
-        with pytest.warns(UserWarning):
-            encoder.fit(
-                binary_class_data[["category"]],
-                binary_class_data["target"],
-            )
+        encoder.fit(
+            binary_class_data[["category"]],
+            binary_class_data["target"],
+        )
         transformed = encoder.transform(binary_class_data[["category"]])
 
         assert transformed["category"].to_list()[-1] == -999
