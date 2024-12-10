@@ -23,6 +23,7 @@ class TargetEncoder(BaseTargetEncoder):
 
     Args:
         columns (str, list[str], list[nw.typing.DTypes]): List of columns to encode.
+
             - If a list of strings is passed, it is treated as a list of column names to encode.
             - If a single string is passed instead, it is treated as a regular expression pattern to
               match column names.
@@ -32,6 +33,7 @@ class TargetEncoder(BaseTargetEncoder):
 
         unseen (str): Strategy to handle categories that appear during the `transform` step but were
             never encountered in the `fit` step.
+
             - If `'raise'`, an error is raised when unseen categories are found.
             - If `'ignore'`, the unseen categories are encoded with the fill_value_unseen.
 
@@ -39,12 +41,14 @@ class TargetEncoder(BaseTargetEncoder):
             categories. Defaults to `"mean"`, which will use the mean of the target variable.
 
         missing_values (str): Strategy to handle missing values.
+
             - If `'encode'`, missing values are initially replaced with a specified fill value and
               the mean is computed as if it were a regular category.
             - If `'ignore'`, missing values are left as is.
             - If `'raise'`, an error is raised when missing values are found.
 
         type_of_target (str): Type of the target variable.
+
             - If `'auto'`, the type is inferred from the target variable.
             - If `'binary'`, the target variable is binary.
             - If `'multiclass'`, the target variable is multiclass.
@@ -104,12 +108,7 @@ class TargetEncoder(BaseTargetEncoder):
         self, x_y: IntoFrameT, target_col: str, column: str
     ) -> dict:
         mean_target_all_categories = (
-            x_y.group_by(column).agg(nw.col(target_col).mean()).rows(named=True)
+            x_y.group_by(column).agg(nw.col(target_col).mean()).rows()
         )
-        mean_target = {}
-        for mean_target_per_category in mean_target_all_categories:
-            mean_target[mean_target_per_category[column]] = mean_target_per_category[
-                target_col
-            ]
-
+        mean_target = dict(mean_target_all_categories)
         return mean_target
