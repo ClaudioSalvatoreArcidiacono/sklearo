@@ -296,11 +296,11 @@ class WOEEncoder(BaseOneToOneEncoder):
             X (DataFrame): The input data.
             y (Series): The target variable.
         """
+        self.feature_names_in_ = list(X.columns)
+        self.columns_ = list(select_columns(X, self.columns))
 
         X = self._handle_missing_values(X)
 
-        self.feature_names_in_ = list(X.columns)
-        self.columns_ = list(select_columns(X, self.columns))
         self.encoding_map_ = {}
         self.is_zero_one_target_ = False
         unique_classes = sorted(y.unique().to_list())
