@@ -1,6 +1,6 @@
 from functools import wraps
 
-from sklearo.utils import infer_type_of_target
+from sklearo.utils import infer_target_type
 
 
 def check_X_y(func):
@@ -40,7 +40,7 @@ def check_type_of_target(*allowed_types_of_target):
     def decorator(func):
         @wraps(func)
         def wrapper(self, X, y, *args, **kwargs):
-            inferred_type_of_target = infer_type_of_target(y)
+            inferred_type_of_target = infer_target_type(y)
             if inferred_type_of_target not in allowed_types_of_target:
                 raise ValueError(
                     f"{self.__class__.__name__} supports the following types of target: "

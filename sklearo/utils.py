@@ -45,7 +45,7 @@ def select_columns(df: nw.DataFrame, columns: Sequence[nw.typing.DTypes | str] |
 
 
 @nw.narwhalify
-def infer_type_of_target(y: IntoSeriesT) -> str:
+def infer_target_type(y: IntoSeriesT) -> str:
     """Infer the type of target variable based on the input series.
 
     This function determines the type of target variable based on the unique values and data type
@@ -70,27 +70,27 @@ def infer_type_of_target(y: IntoSeriesT) -> str:
             - `"unknown"`: Returned when the input series is none of the above types.
 
     Examples:
-        >>> type_of_target(pd.Series([1, 2, 3])
+        >>> infer_target_type(pd.Series([1, 2, 3])
         "multiclass"
-        >>> type_of_target(pd.Series([1, 2, 1])
+        >>> infer_target_type(pd.Series([1, 2, 1])
         "binary"
-        >>> type_of_target(pd.Series([1, 2, 4])
+        >>> infer_target_type(pd.Series([1, 2, 4])
         "multiclass"
-        >>> type_of_target(pd.Series(["a", "b", "c"])
+        >>> infer_target_type(pd.Series(["a", "b", "c"])
         "multiclass"
-        >>> type_of_target(pd.Series(["a", "b", "a"])
+        >>> infer_target_type(pd.Series(["a", "b", "a"])
         "binary"
-        >>> type_of_target(pd.Series([1.0, 2.0, 3.5])
+        >>> infer_target_type(pd.Series([1.0, 2.0, 3.5])
         "continuous"
-        >>> type_of_target(pd.Series([1.0, 3.5, 3.5])
+        >>> infer_target_type(pd.Series([1.0, 3.5, 3.5])
         "continuous"
-        >>> type_of_target(pd.Series([1.0, 2.0, 4.0])
+        >>> infer_target_type(pd.Series([1.0, 2.0, 4.0])
         "continuous"
-        >>> type_of_target(pd.Series([1.0, 4.0, 4.0])
+        >>> infer_target_type(pd.Series([1.0, 4.0, 4.0])
         "binary"
-        >>> type_of_target(pd.Series([1.0, 2.0, 3.0])
+        >>> infer_target_type(pd.Series([1.0, 2.0, 3.0])
         "multiclass"
-        >>> type_of_target(pd.Series([1.0, 2.0, 1.0])
+        >>> infer_target_type(pd.Series([1.0, 2.0, 1.0])
         "binary"
 
     """

@@ -1,15 +1,10 @@
-import math
-import warnings
-from collections import defaultdict
-from typing import Any, Literal, Sequence
+from typing import Literal, Sequence
 
 import narwhals as nw
-from narwhals.typing import IntoFrameT, IntoSeriesT
+from narwhals.typing import IntoFrameT
 from pydantic import validate_call
 
 from sklearo.encoding.base import BaseTargetEncoder
-from sklearo.utils import infer_type_of_target, select_columns
-from sklearo.validation import check_if_fitted, check_X_y
 
 
 class TargetEncoder(BaseTargetEncoder):
@@ -47,7 +42,7 @@ class TargetEncoder(BaseTargetEncoder):
             - If `'ignore'`, missing values are left as is.
             - If `'raise'`, an error is raised when missing values are found.
 
-        type_of_target (str): Type of the target variable.
+        target_type (str): Type of the target variable.
 
             - If `'auto'`, the type is inferred from the target variable.
             - If `'binary'`, the target variable is binary.
@@ -95,14 +90,14 @@ class TargetEncoder(BaseTargetEncoder):
         unseen: Literal["raise", "ignore"] = "raise",
         fill_value_unseen: int | float | None | Literal["mean"] = "mean",
         missing_values: Literal["encode", "ignore", "raise"] = "encode",
-        type_of_target: Literal["auto", "binary", "multiclass", "continuous"] = "auto",
+        target_type: Literal["auto", "binary", "multiclass", "continuous"] = "auto",
     ) -> None:
 
         self.columns = columns
         self.missing_values = missing_values
         self.unseen = unseen
         self.fill_value_unseen = fill_value_unseen
-        self.type_of_target = type_of_target
+        self.target_type = target_type
 
     def _calculate_target_statistic(
         self, x_y: IntoFrameT, target_col: str, column: str

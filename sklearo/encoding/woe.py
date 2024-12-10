@@ -8,7 +8,7 @@ from narwhals.typing import IntoFrameT, IntoSeriesT
 from pydantic import validate_call
 
 from sklearo.encoding.base import BaseTargetEncoder
-from sklearo.utils import infer_type_of_target, select_columns
+from sklearo.utils import infer_target_type, select_columns
 from sklearo.validation import check_if_fitted, check_type_of_target, check_X_y
 
 

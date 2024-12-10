@@ -6,7 +6,7 @@ import narwhals as nw
 from narwhals.typing import IntoFrameT, IntoSeriesT
 
 from sklearo.base import BaseTransformer
-from sklearo.utils import infer_type_of_target, select_columns
+from sklearo.utils import infer_target_type, select_columns
 from sklearo.validation import check_if_fitted, check_X_y
 
 
@@ -59,18 +59,18 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
 
         X = self._handle_missing_values(X)
 
-        if not hasattr(self, "type_of_target") or self.type_of_target == "auto":
-            self.type_of_target_ = infer_type_of_target(y)
+        if not hasattr(self, "target_type") or self.target_type == "auto":
+            self.target_type_ = infer_target_type(y)
         else:
-            self.type_of_target_ = self.type_of_target
+            self.target_type_ = self.target_type
 
-        if self.type_of_target_ not in self._allowed_types_of_target:
+        if self.target_type_ not in self._allowed_types_of_target:
             raise ValueError(
-                f"Invalid type of target '{self.type_of_target_}'. "
+                f"Invalid type of target '{self.target_type_}'. "
                 f"Allowed types are {self._allowed_types_of_target}."
             )
 
-        if self.type_of_target_ == "binary":
+        if self.target_type_ == "binary":
             unique_classes = sorted(y.unique().to_list())
             if unique_classes != [0, 1]:
                 y = y.replace_strict({unique_classes[0]: 0, unique_classes[1]: 1})
@@ -86,7 +86,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
 
         X_y = X[self.columns_].with_columns(**{target_col_name: y})
 
-        if self.type_of_target_ == "multiclass":
+        if self.target_type_ == "multiclass":
             unique_classes = y.unique().sort().to_list()
             self.unique_classes_ = unique_classes
             self.encoding_map_ = defaultdict(dict)
@@ -132,7 +132,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
         X = self._handle_missing_values(X)
         unseen_per_col = {}
         for column, mapping in self.encoding_map_.items():
-            if self.type_of_target_ in ("binary", "continuous"):
+            if self.target_type_ in ("binary", "continuous"):
                 seen_categories = mapping.keys()
             else:
                 seen_categories = next(iter(mapping.values())).keys()
@@ -158,7 +158,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
                     f"These categories will be encoded as {self.fill_value_unseen}."
                 )
 
-        if self.type_of_target_ in ("binary", "continuous"):
+        if self.target_type_ in ("binary", "continuous"):
             return self._transform_binary_continuous(X, unseen_per_col)
 
         else:  # multiclass
@@ -166,7 +166,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
 
     @check_if_fitted
     def get_feature_names_out(self) -> list[str]:
-        if self.type_of_target_ in ("binary", "continuous"):
+        if self.target_type_ in ("binary", "continuous"):
             return self.feature_names_in_
 
         else:  # multiclass

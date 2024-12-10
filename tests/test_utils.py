@@ -4,7 +4,7 @@ import polars as pl
 import pytest
 
 from sklearo.utils import (
-    infer_type_of_target,
+    infer_target_type,
     select_columns,
     select_columns_by_regex_pattern,
     select_columns_by_types,
@@ -100,9 +100,9 @@ class TestTypeOfTarget:
     )
     def test_type_of_target(self, Series, data, expected):
         series = Series(data)
-        assert infer_type_of_target(series) == expected
+        assert infer_target_type(series) == expected
 
     def test_type_of_target_unknown(self, Series):
         data = [None, None, None]
         series = Series(data)
-        assert infer_type_of_target(series) == "unknown"
+        assert infer_target_type(series) == "unknown"
