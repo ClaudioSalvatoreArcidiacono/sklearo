@@ -44,7 +44,8 @@ class TargetEncoder(BaseTargetEncoder):
 
         target_type (str): Type of the target variable.
 
-            - If `'auto'`, the type is inferred from the target variable.
+            - If `'auto'`, the type is inferred from the target variable using
+                [`infer_target_type`][sklearo.utils.infer_target_type].
             - If `'binary'`, the target variable is binary.
             - If `'multiclass'`, the target variable is multiclass.
             - If `'continuous'`, the target variable is continuous.
