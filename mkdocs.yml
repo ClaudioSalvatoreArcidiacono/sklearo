@@ -1,5 +1,6 @@
 site_name: sklearo
 site_url: https://claudiosalvatorearcidiacono.github.io/sklearo/
+repo_url: https://github.com/ClaudioSalvatoreArcidiacono/sklearo
 
 theme:
   name: material

@@ -34,16 +34,16 @@ encoder = WOEEncoder()
 encoder.fit(df[["category"]], df["target"])
 encoded = encoder.transform(df[["category"]])
 print(encoded)
-category
-0 -0.223144
-1 -0.223144
-2 -0.223144
-3  1.029619
-4  1.029619
-5  1.029619
-6  1.029619
-7  1.029619
-8  1.029619
+   category
+0 -0.916291
+1 -0.916291
+2 -0.916291
+3  0.470004
+4  0.470004
+5  0.470004
+6  0.470004
+7  0.470004
+8  0.470004
 ```
 
 ## Features
