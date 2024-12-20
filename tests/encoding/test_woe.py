@@ -478,3 +478,25 @@ class TestWOEEncoder:
         # Ensure that the transformed data is not None and has the expected shape
         assert transformed is not None
         assert transformed.shape[0] == binary_class_data_df.shape[0]
+
+    def test_woe_encoder_with_regression_target_type_raises_error(self, DataFrame):
+        regression_data = {
+            "category": ["A"] * 4 + ["B"] * 6,
+            "target": [
+                100.0,
+                200.0,
+                300.0,
+                400.0,
+                500.0,
+                600.0,
+                700.0,
+                800.0,
+                900.0,
+                10000.0,
+            ],
+        }
+        regression_data_df = DataFrame(regression_data)
+
+        encoder = WOEEncoder()
+        with pytest.raises(ValueError, match="Invalid type of target 'continuous'."):
+            encoder.fit(regression_data_df[["category"]], regression_data_df["target"])

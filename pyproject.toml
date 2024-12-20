@@ -14,7 +14,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-dependencies = ["narwhals", "pydantic"]
+dependencies = ["narwhals", "pydantic", "scikit-learn"]
 
 [project.optional-dependencies]
 dev = [

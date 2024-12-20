@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -27,7 +29,26 @@ class TestTargetEncoder:
         }
         return data
 
-    def test_woe_encoder_fit_binary(self, binary_class_data, DataFrame):
+    @pytest.fixture
+    def regression_data(self):
+        data = {
+            "category": ["A"] * 4 + ["B"] * 6,
+            "target": [
+                100.0,
+                200.0,
+                300.0,
+                400.0,
+                500.0,
+                600.0,
+                700.0,
+                800.0,
+                900.0,
+                10000.0,
+            ],
+        }
+        return data
+
+    def test_target_encoder_fit_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)
         encoder = TargetEncoder()
         encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
@@ -35,7 +56,42 @@ class TestTargetEncoder:
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
 
-    def test_woe_encoder_fit_multiclass_non_int_target(
+    def test_target_encoder_fit_regression(self, regression_data, DataFrame):
+        regression_data = DataFrame(regression_data)
+        encoder = TargetEncoder()
+        encoder.fit(regression_data[["category"]], regression_data["target"])
+
+        assert encoder.columns_ == ["category"]
+        assert "category" in encoder.encoding_map_
+
+    def test_target_encoder_unseen_value_fill_unseen_multiclass(
+        self, multi_class_data, DataFrame
+    ):
+        multi_class_data = DataFrame(multi_class_data)
+        encoder = TargetEncoder(unseen="fill", fill_value_unseen="mean")
+        encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
+
+        new_data = DataFrame({"category": ["A", "B", "D"]})
+        with pytest.warns(UserWarning, match="Unseen categories"):
+            transformed = encoder.transform(new_data)
+
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_1"].to_list(),
+            [0.4, 0.2, 0.3],
+            rtol=1e-5,
+        )
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_2"].to_list(),
+            [0.2, 0.4, 0.3],
+            rtol=1e-5,
+        )
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_3"].to_list(),
+            [0.4, 0.4, 0.4],
+            rtol=1e-5,
+        )
+
+    def test_target_encoder_fit_multiclass_non_int_target(
         self, binary_class_data, DataFrame
     ):
         binary_class_data = DataFrame(binary_class_data)
@@ -52,7 +108,9 @@ class TestTargetEncoder:
             rtol=1e-5,
         )
 
-    def test_woe_encoder_fit_binary_non_int_target(self, multi_class_data, DataFrame):
+    def test_target_encoder_fit_binary_non_int_target(
+        self, multi_class_data, DataFrame
+    ):
         multi_class_data = DataFrame(multi_class_data)
         encoder = TargetEncoder(columns=["target"])
         encoder.fit(multi_class_data[["target"]], multi_class_data["category"])
@@ -84,7 +142,7 @@ class TestTargetEncoder:
             rtol=1e-5,
         )
 
-    def test_woe_encoder_fit_binary_non_int_target_classes_1_and_2(
+    def test_target_encoder_fit_binary_non_int_target_classes_1_and_2(
         self, binary_class_data, DataFrame
     ):
         binary_class_data["target"] = [
@@ -121,7 +179,7 @@ class TestTargetEncoder:
             rtol=1e-5,
         )
 
-    def test_woe_encoder_fit_with_target_in_X_binary(
+    def test_target_encoder_fit_with_target_in_X_binary(
         self, binary_class_data, DataFrame
     ):
         binary_class_data = DataFrame(binary_class_data)
@@ -132,7 +190,7 @@ class TestTargetEncoder:
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
 
-    def test_woe_encoder_fit_with_target_in_X_multi_class(
+    def test_target_encoder_fit_with_target_in_X_multi_class(
         self, multi_class_data, DataFrame
     ):
         multi_class_data = DataFrame(multi_class_data)
@@ -143,7 +201,7 @@ class TestTargetEncoder:
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
 
-    def test_woe_encoder_fit_with_empty_columns(self, multi_class_data, DataFrame):
+    def test_target_encoder_fit_with_empty_columns(self, multi_class_data, DataFrame):
         multi_class_data = DataFrame(multi_class_data)
         encoder = TargetEncoder(columns=[])
         encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
@@ -151,7 +209,7 @@ class TestTargetEncoder:
         assert encoder.columns_ == []
         assert encoder.encoding_map_ == {}
 
-    def test_woe_encoder_fit_multi_class(self, multi_class_data, DataFrame):
+    def test_target_encoder_fit_multi_class(self, multi_class_data, DataFrame):
         multi_class_data = DataFrame(multi_class_data)
         encoder = TargetEncoder()
         encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
@@ -159,7 +217,7 @@ class TestTargetEncoder:
         assert encoder.columns_ == ["category"]
         assert "category" in encoder.encoding_map_
 
-    def test_woe_encoder_transform_binary(self, binary_class_data, DataFrame):
+    def test_target_encoder_transform_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)
         encoder = TargetEncoder()
         encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
@@ -181,7 +239,30 @@ class TestTargetEncoder:
         )
         assert isinstance(transformed, DataFrame)
 
-    def test_woe_encoder_transform_multi_class(self, multi_class_data, DataFrame):
+    def test_target_encoder_transform_regression(self, regression_data, DataFrame):
+        regression_data = DataFrame(regression_data)
+        encoder = TargetEncoder()
+        encoder.fit(regression_data[["category"]], regression_data["target"])
+        transformed = encoder.transform(regression_data[["category"]])
+
+        expected_values = [
+            250.0,
+            250.0,
+            250.0,
+            250.0,
+            2250.0,
+            2250.0,
+            2250.0,
+            2250.0,
+            2250.0,
+            2250.0,
+        ]
+        np.testing.assert_allclose(
+            transformed["category"].to_list(), expected_values, rtol=1e-5
+        )
+        assert isinstance(transformed, DataFrame)
+
+    def test_target_encoder_transform_multi_class(self, multi_class_data, DataFrame):
         multi_class_data = DataFrame(multi_class_data)
         encoder = TargetEncoder()
         encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
@@ -209,12 +290,12 @@ class TestTargetEncoder:
 
         np.testing.assert_allclose(
             transformed["category_mean_target_class_3"],
-            # For class 3 A counts : 2/5, B counts : 2/
+            # For class 3 A counts : 2/5, B counts : 2/5
             [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
             rtol=1e-5,
         )
 
-    def test_woe_encoder_handle_missing_values_binary(
+    def test_target_encoder_underrepresented_categories_binary(
         self, binary_class_data, DataFrame
     ):
         binary_class_data["category"][0] = None
@@ -222,24 +303,121 @@ class TestTargetEncoder:
 
         encoder = TargetEncoder(missing_values="encode")
 
-        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
-        transformed = encoder.transform(binary_class_data[["category"]])
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "Found underrepresented categories for the column category: "
+                "['MISSING']. Please consider handling underrepresented categories by using a "
+                "RareLabelEncoder. Alternatively, set underrepresented_categories to 'fill'."
+            ),
+        ):
+            encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-        assert "MISSING" in encoder.encoding_map_["category"]
-
-    def test_woe_encoder_handle_missing_values_multi_class(
+    def test_target_encoder_underrepresented_categories_multi_class(
         self, multi_class_data, DataFrame
     ):
         multi_class_data["category"][0] = None
         multi_class_data = DataFrame(multi_class_data)
 
         encoder = TargetEncoder(missing_values="encode")
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "Found underrepresented categories for the column category: "
+                "['MISSING']. Please consider handling underrepresented categories by using a "
+                "RareLabelEncoder. Alternatively, set underrepresented_categories to 'fill'."
+            ),
+        ):
+            encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
+
+    def test_target_encoder_handle_missing_values_binary(
+        self, binary_class_data, DataFrame
+    ):
+        binary_class_data["category"][0] = None
+        binary_class_data = DataFrame(binary_class_data)
+
+        encoder = TargetEncoder(
+            missing_values="encode", underrepresented_categories="fill"
+        )
+        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+
+        transformed = encoder.transform(binary_class_data[["category"]])
+        np.testing.assert_allclose(
+            transformed["category"].to_list(),
+            [
+                0.555556,
+                0.0,
+                0.0,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+            ],
+            rtol=1e-5,
+        )
+
+    def test_target_encoder_handle_missing_values_multi_class(
+        self, multi_class_data, DataFrame
+    ):
+        multi_class_data["category"][0] = None
+        multi_class_data = DataFrame(multi_class_data)
+
+        encoder = TargetEncoder(
+            missing_values="encode", underrepresented_categories="fill"
+        )
+
         encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
+
         transformed = encoder.transform(multi_class_data[["category"]])
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_1"].to_list(),
+            [0.3, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.2, 0.2],
+            rtol=1e-5,
+        )
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_2"].to_list(),
+            [0.3, 0.25, 0.25, 0.25, 0.25, 0.4, 0.4, 0.4, 0.4, 0.4],
+            rtol=1e-5,
+        )
+        np.testing.assert_allclose(
+            transformed["category_mean_target_class_3"].to_list(),
+            [0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.4, 0.4, 0.4, 0.4],
+            rtol=1e-5,
+        )
 
-        assert "MISSING" in encoder.encoding_map_["category"][1]
+    def test_target_encoder_unnderrepresented_categories_binary_fill_binary_set_value(
+        self, binary_class_data, DataFrame
+    ):
+        binary_class_data["category"][0] = None
+        binary_class_data = DataFrame(binary_class_data)
 
-    def test_woe_encoder_unseen_category_binary(self, binary_class_data, DataFrame):
+        encoder = TargetEncoder(
+            missing_values="encode",
+            underrepresented_categories="fill",
+            fill_values_underrepresented=999,
+        )
+        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+
+        transformed = encoder.transform(binary_class_data[["category"]])
+        np.testing.assert_allclose(
+            transformed["category"].to_list(),
+            [
+                999,
+                0.0,
+                0.0,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+                0.666667,
+            ],
+            rtol=1e-5,
+        )
+
+    def test_target_encoder_unseen_category_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)
         encoder = TargetEncoder(unseen="ignore", fill_value_unseen=-999)
         encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
@@ -252,7 +430,7 @@ class TestTargetEncoder:
             transformed["category"].to_list(), [0.3333333, 0.6666667, -999], rtol=1e-5
         )
 
-    def test_woe_encoder_unseen_category_binary_raise(
+    def test_target_encoder_unseen_category_binary_raise(
         self, binary_class_data, DataFrame
     ):
         binary_class_data = DataFrame(binary_class_data)
@@ -327,7 +505,7 @@ class TestTargetEncoder:
                 binary_class_data[["category"]].head(), binary_class_data["target"]
             )
 
-    def test_woe_encoder_handle_missing_values_raise_in_fit(
+    def test_target_encoder_handle_missing_values_raise_in_fit(
         self, binary_class_data, DataFrame
     ):
         binary_class_data["category"][0] = None
@@ -337,7 +515,7 @@ class TestTargetEncoder:
         with pytest.raises(ValueError, match="Some columns have missing values."):
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-    def test_woe_encoder_handle_missing_values_raise_in_transform(
+    def test_target_encoder_handle_missing_values_raise_in_transform(
         self, binary_class_data, DataFrame
     ):
         binary_class_data_df = DataFrame(binary_class_data)
@@ -351,7 +529,7 @@ class TestTargetEncoder:
         with pytest.raises(ValueError, match="Some columns have missing values."):
             encoder.transform(binary_class_data_df[["category"]])
 
-    def test_woe_encoder_handle_missing_values_ignore_in_fit(
+    def test_target_encoder_handle_missing_values_ignore_in_fit(
         self, binary_class_data, DataFrame
     ):
         binary_class_data["category"][1] = None
@@ -362,7 +540,7 @@ class TestTargetEncoder:
         # Ensure that fitting does not raise an error
         assert encoder is not None
 
-    def test_woe_encoder_handle_missing_values_ignore_in_transform(
+    def test_target_encoder_handle_missing_values_ignore_in_transform(
         self, binary_class_data, DataFrame
     ):
         binary_class_data_df = DataFrame(binary_class_data)
@@ -385,7 +563,7 @@ class TestTargetEncoder:
         with pytest.raises(ValueError, match="y contains missing values."):
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-    def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
+    def test_target_encoder_fit_transform(self, binary_class_data, DataFrame):
         binary_class_data_df = DataFrame(binary_class_data)
 
         encoder = TargetEncoder()
@@ -396,3 +574,27 @@ class TestTargetEncoder:
         # Ensure that the transformed data is not None and has the expected shape
         assert transformed is not None
         assert transformed.shape[0] == binary_class_data_df.shape[0]
+
+    def test_target_encoder_explicitly_set_target_type(
+        self, multi_class_data, DataFrame
+    ):
+        multi_class_data = DataFrame(multi_class_data)
+        encoder = TargetEncoder(target_type="continuous")
+        encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
+
+        assert encoder.columns_ == ["category"]
+        assert "category" in encoder.encoding_map_
+
+        transformed_data = encoder.transform(multi_class_data[["category"]])
+
+        assert (
+            encoder.get_feature_names_out()
+            == ["category"]
+            == list(transformed_data.columns)
+        )
+
+        np.testing.assert_allclose(
+            transformed_data["category"].to_list(),
+            [2.0, 2.0, 2.0, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, 2.2],
+            rtol=1e-5,
+        )
