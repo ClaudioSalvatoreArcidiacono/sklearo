@@ -111,9 +111,9 @@ class TargetEncoder(BaseTargetEncoder):
     ) -> dict:
 
         if column in (
-            "category_count",
-            "sum_target",
-            "std_target",
+            "count_per_category",
+            "sum_target_per_category",
+            "std_target_per_category",
             "smoothing",
             "shrinkage",
             "smoothed_target",
@@ -125,18 +125,20 @@ class TargetEncoder(BaseTargetEncoder):
         else:
             original_column_name = column
 
+        mean_target = x_y[target_col].mean()
+
         x_y_grouped = x_y.group_by(column, drop_null_keys=True).agg(
-            category_count=nw.col(target_col).count(),
-            sum_target=nw.col(target_col).sum(),
+            count_per_category=nw.col(target_col).count(),
+            sum_target_per_category=nw.col(target_col).sum(),
             **(
-                {"std_target": nw.col(target_col).std()}
+                {"var_target_per_category": nw.col(target_col).var()}
                 if self.smooth == "auto"
                 else {}
             ),
         )
-        underrepresented_categories = x_y_grouped.filter(nw.col("category_count") == 1)[
-            column
-        ].to_list()
+        underrepresented_categories = x_y_grouped.filter(
+            nw.col("count_per_category") == 1
+        )[column].to_list()
         if underrepresented_categories:
             if self.underrepresented_categories == "raise":
                 raise ValueError(
@@ -147,7 +149,7 @@ class TargetEncoder(BaseTargetEncoder):
                 )
             else:
                 if self.fill_values_underrepresented == "mean":
-                    fill_values_underrepresented = x_y[target_col].mean()
+                    fill_values_underrepresented = mean_target
                 else:
                     fill_values_underrepresented = self.fill_values_underrepresented
 
@@ -162,25 +164,23 @@ class TargetEncoder(BaseTargetEncoder):
             encoding_dict = {}
 
         if self.smooth == "auto":
-            target_std = x_y[target_col].std()
+            var_target = x_y[target_col].var()
             x_y_grouped = x_y_grouped.with_columns(
-                smoothing=nw.col("std_target") / target_std
+                smoothing=nw.col("var_target_per_category") / var_target
             )
         else:
             x_y_grouped = x_y_grouped.with_columns(smoothing=nw.lit(self.smooth))
 
         categories_encoding_as_list = (
             x_y_grouped.with_columns(
-                shrinkage=nw.col("category_count")
-                / (nw.col("category_count") + nw.col("smoothing"))
+                shrinkage=nw.col("count_per_category")
+                / (nw.col("count_per_category") + nw.col("smoothing"))
             )
             .with_columns(
                 smoothed_target=nw.col("shrinkage")
-                * nw.col("sum_target")
-                / nw.col("category_count")
-                + (1 - nw.col("shrinkage"))
-                * nw.col("sum_target")
-                / nw.col("category_count")
+                * nw.col("sum_target_per_category")
+                / nw.col("count_per_category")
+                + (1 - nw.col("shrinkage")) * mean_target
             )
             .select(column, "smoothed_target")
             .rows()

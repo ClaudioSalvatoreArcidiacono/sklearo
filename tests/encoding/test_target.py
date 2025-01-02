@@ -77,12 +77,12 @@ class TestTargetEncoder:
 
         np.testing.assert_allclose(
             transformed["category_mean_target_class_1"].to_list(),
-            [0.4, 0.2, 0.3],
+            [0.379545, 0.214634, 0.3],
             rtol=1e-5,
         )
         np.testing.assert_allclose(
             transformed["category_mean_target_class_2"].to_list(),
-            [0.2, 0.4, 0.3],
+            [0.214634, 0.379545, 0.3],
             rtol=1e-5,
         )
         np.testing.assert_allclose(
@@ -104,7 +104,17 @@ class TestTargetEncoder:
         transformed_data = encoder.transform(binary_class_data[["target"]])
         np.testing.assert_allclose(
             transformed_data["target_mean_target_class_A"].to_list(),
-            [0.2, 0.5, 0.5, 0.2, 0.2, 0.5, 0.2, 0.2, 0.5],
+            [
+                0.218391,
+                0.458333,
+                0.458333,
+                0.218391,
+                0.218391,
+                0.458333,
+                0.218391,
+                0.218391,
+                0.458333,
+            ],
             rtol=1e-5,
         )
 
@@ -128,14 +138,14 @@ class TestTargetEncoder:
         np.testing.assert_allclose(
             transformed_data["target"].to_list(),
             [
-                0.333333,
-                0.333333,
-                0.666667,
+                0.380952,
+                0.380952,
+                0.619048,
                 0.5,
                 0.5,
-                0.333333,
-                0.666667,
-                0.666667,
+                0.380952,
+                0.619048,
+                0.619048,
                 0.5,
                 0.5,
             ],
@@ -166,15 +176,15 @@ class TestTargetEncoder:
         np.testing.assert_allclose(
             transformed_data["category"].to_list(),
             [
-                0.666667,
-                0.666667,
-                0.666667,
-                0.333333,
-                0.333333,
-                0.333333,
-                0.333333,
-                0.333333,
-                0.333333,
+                0.603175,
+                0.603175,
+                0.603175,
+                0.365079,
+                0.365079,
+                0.365079,
+                0.365079,
+                0.365079,
+                0.365079,
             ],
             rtol=1e-5,
         )
@@ -224,15 +234,15 @@ class TestTargetEncoder:
         transformed = encoder.transform(binary_class_data[["category"]])
 
         expected_values = [
-            0.333333,
-            0.333333,
-            0.333333,
-            0.666667,
-            0.666667,
-            0.666667,
-            0.666667,
-            0.666667,
-            0.666667,
+            0.396825,
+            0.396825,
+            0.396825,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
         ]
         np.testing.assert_allclose(
             transformed["category"].to_list(), expected_values, rtol=1e-5
@@ -246,16 +256,16 @@ class TestTargetEncoder:
         transformed = encoder.transform(regression_data[["category"]])
 
         expected_values = [
-            250.0,
-            250.0,
-            250.0,
-            250.0,
-            2250.0,
-            2250.0,
-            2250.0,
-            2250.0,
-            2250.0,
-            2250.0,
+            250.549702,
+            250.549702,
+            250.549702,
+            250.549702,
+            2082.60129,
+            2082.60129,
+            2082.60129,
+            2082.60129,
+            2082.60129,
+            2082.60129,
         ]
         np.testing.assert_allclose(
             transformed["category"].to_list(), expected_values, rtol=1e-5
@@ -277,14 +287,36 @@ class TestTargetEncoder:
         np.testing.assert_allclose(
             transformed["category_mean_target_class_1"],
             # For class 1 A counts : 2/5, B counts : 1/5
-            [0.4, 0.4, 0.4, 0.4, 0.4, 0.2, 0.2, 0.2, 0.2, 0.2],
+            [
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+            ],
             rtol=1e-5,
         )
 
         np.testing.assert_allclose(
             transformed["category_mean_target_class_2"],
             # For class 2 A counts : 1/5, B counts : 2/5
-            [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.4],
+            [
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+            ],
             rtol=1e-5,
         )
 
@@ -348,12 +380,12 @@ class TestTargetEncoder:
                 0.555556,
                 0.0,
                 0.0,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
+                0.634921,
+                0.634921,
+                0.634921,
+                0.634921,
+                0.634921,
+                0.634921,
             ],
             rtol=1e-5,
         )
@@ -373,17 +405,39 @@ class TestTargetEncoder:
         transformed = encoder.transform(multi_class_data[["category"]])
         np.testing.assert_allclose(
             transformed["category_mean_target_class_1"].to_list(),
-            [0.3, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.2, 0.2],
+            [
+                0.3,
+                0.260563,
+                0.260563,
+                0.260563,
+                0.260563,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+                0.214634,
+            ],
             rtol=1e-5,
         )
         np.testing.assert_allclose(
             transformed["category_mean_target_class_2"].to_list(),
-            [0.3, 0.25, 0.25, 0.25, 0.25, 0.4, 0.4, 0.4, 0.4, 0.4],
+            [
+                0.3,
+                0.260563,
+                0.260563,
+                0.260563,
+                0.260563,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+                0.379545,
+            ],
             rtol=1e-5,
         )
         np.testing.assert_allclose(
             transformed["category_mean_target_class_3"].to_list(),
-            [0.4, 0.5, 0.5, 0.5, 0.5, 0.4, 0.4, 0.4, 0.4, 0.4],
+            [0.4, 0.47619, 0.47619, 0.47619, 0.47619, 0.4, 0.4, 0.4, 0.4, 0.4],
             rtol=1e-5,
         )
 
@@ -404,15 +458,15 @@ class TestTargetEncoder:
         np.testing.assert_allclose(
             transformed["category"].to_list(),
             [
-                999,
-                0.0,
-                0.0,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
-                0.666667,
+                9.990000e02,
+                0.000000e00,
+                0.000000e00,
+                6.349206e-01,
+                6.349206e-01,
+                6.349206e-01,
+                6.349206e-01,
+                6.349206e-01,
+                6.349206e-01,
             ],
             rtol=1e-5,
         )
@@ -427,7 +481,9 @@ class TestTargetEncoder:
             transformed = encoder.transform(new_data)
 
         np.testing.assert_allclose(
-            transformed["category"].to_list(), [0.3333333, 0.6666667, -999], rtol=1e-5
+            transformed["category"].to_list(),
+            [3.968254e-01, 6.349206e-01, -9.990000e02],
+            rtol=1e-5,
         )
 
     def test_target_encoder_unseen_category_binary_raise(
@@ -595,6 +651,17 @@ class TestTargetEncoder:
 
         np.testing.assert_allclose(
             transformed_data["category"].to_list(),
-            [2.0, 2.0, 2.0, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, 2.2],
+            [
+                2.02069,
+                2.02069,
+                2.02069,
+                2.02069,
+                2.02069,
+                2.184559,
+                2.184559,
+                2.184559,
+                2.184559,
+                2.184559,
+            ],
             rtol=1e-5,
         )
