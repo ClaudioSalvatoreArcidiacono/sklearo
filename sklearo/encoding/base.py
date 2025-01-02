@@ -109,7 +109,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
                     )
                 if self.unseen == "fill" and self.fill_value_unseen == "mean":
                     self.mean_target_[class_] = X_y_binarized[target_col_name].mean()
-
+            self.encoding_map_ = dict(self.encoding_map_)
         else:
             for column in self.columns_:
                 self.encoding_map_[column] = self._calculate_target_statistic(
