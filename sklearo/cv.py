@@ -21,7 +21,6 @@ def ceil_div(col: nw.Expr, divisor: int) -> nw.Expr:
     return col // divisor + (col % divisor > 0)
 
 
-@nw.narwhalify
 def add_cv_fold_id_column_k_fold(X: IntoFrameT, k: int = 5) -> IntoFrameT:
     """
     Add a column `fold_id` to the DataFrame indicating the fold ID for k-fold cross-validation.
@@ -74,12 +73,12 @@ def add_cv_fold_id_column_k_fold(X: IntoFrameT, k: int = 5) -> IntoFrameT:
                     n_elements_per_fold,
                 )
             )
+            - 1
         )
         .drop("one", "row_number")
     )
 
 
-@nw.narwhalify
 def add_cv_fold_id_column_stratified_k_fold(
     X: IntoFrameT, y: IntoSeriesT, k: int = 5
 ) -> IntoFrameT:
@@ -117,7 +116,7 @@ def add_cv_fold_id_column_stratified_k_fold(
         9  9        3
     """
     return (
-        X.with_columns(target=y, one=nw.lit(1))
+        X.with_columns(one=nw.lit(1), target=y)
         .with_columns(
             count_per_class=nw.len().over("target"),
             row_number_per_class=nw.col("one").cum_count().over("target"),
@@ -146,6 +145,7 @@ def add_cv_fold_id_column_stratified_k_fold(
                     nw.col("n_elements_per_fold_per_class"),
                 )
             )
+            - 1
         )
         .drop(
             "target",

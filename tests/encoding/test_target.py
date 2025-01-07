@@ -8,6 +8,37 @@ import pytest
 from sklearo.encoding import TargetEncoder
 
 
+def test_target_encoder_fit_transform_comparison_with_scikit_learn():
+    from sklearn.model_selection import KFold
+    from sklearn.preprocessing import TargetEncoder as TargetEncoderSKlearn
+
+    X = np.array([["dog"] * 20 + ["cat"] * 30 + ["snake"] * 38], dtype=object).T
+    y = [90.3] * 5 + [80.1] * 15 + [20.4] * 5 + [20.1] * 25 + [21.2] * 8 + [49] * 30
+
+    X = pd.DataFrame({"col": X[:, 0]})
+    y = pd.Series(y)
+
+    kf = KFold(n_splits=5)
+
+    X_trans_check = X.copy()
+    for train_index, test_index in kf.split(X):
+        X_train = X.loc[train_index]
+        X_test = X.loc[test_index]
+        y_train = y[train_index]
+        enc_sklearn = TargetEncoderSKlearn()
+        enc_sklearn.set_output(transform="pandas")
+        X_trans_check.loc[test_index, "col"] = enc_sklearn.fit(
+            X_train, y_train
+        ).transform(X_test)["col"]
+
+    X_trans_check["col"] = X_trans_check["col"].astype(float)
+    enc = TargetEncoder()
+    X_trans_sklearo = enc.fit_transform(X, y)
+    np.testing.assert_allclose(
+        X_trans_sklearo["col"].to_list(), X_trans_check["col"].to_list(), rtol=1e-3
+    )
+
+
 @pytest.mark.parametrize(
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
@@ -619,17 +650,41 @@ class TestTargetEncoder:
         with pytest.raises(ValueError, match="y contains missing values."):
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-    def test_target_encoder_fit_transform(self, binary_class_data, DataFrame):
-        binary_class_data_df = DataFrame(binary_class_data)
+    def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
 
-        encoder = TargetEncoder()
+        binary_class_data = DataFrame(
+            {
+                "category": binary_class_data["category"] * 2,
+                "target": binary_class_data["target"] * 2,
+            }
+        )
+        encoder = TargetEncoder(
+            cv=3,
+        )
         transformed = encoder.fit_transform(
-            binary_class_data_df[["category"]], binary_class_data_df["target"]
+            binary_class_data[["category"]], binary_class_data["target"]
         )
 
-        # Ensure that the transformed data is not None and has the expected shape
-        assert transformed is not None
-        assert transformed.shape[0] == binary_class_data_df.shape[0]
+        assert transformed["category"].to_list() == [
+            0.39473684210526316,
+            0.39473684210526316,
+            0.39473684210526316,
+            0.631578947368421,
+            0.631578947368421,
+            0.631578947368421,
+            0.5901639344262295,
+            0.7182080924855492,
+            0.7182080924855492,
+            0.4071588366890381,
+            0.4071588366890381,
+            0.4071588366890381,
+            0.5969245107176142,
+            0.7101449275362318,
+            0.7101449275362318,
+            0.6292134831460674,
+            0.6292134831460674,
+            0.6292134831460674,
+        ]
 
     def test_target_encoder_explicitly_set_target_type(
         self, multi_class_data, DataFrame

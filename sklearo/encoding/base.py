@@ -6,6 +6,10 @@ import narwhals as nw
 from narwhals.typing import IntoFrameT, IntoSeriesT
 
 from sklearo.base import BaseTransformer
+from sklearo.cv import (
+    add_cv_fold_id_column_k_fold,
+    add_cv_fold_id_column_stratified_k_fold,
+)
 from sklearo.utils import infer_target_type, select_columns
 from sklearo.validation import check_if_fitted, check_X_y
 
@@ -44,21 +48,9 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
         """Calculate the target statistic for a column."""
         raise NotImplementedError
 
-    @nw.narwhalify
-    @check_X_y
-    def fit(self, X: IntoFrameT, y: IntoSeriesT) -> "BaseTargetEncoder":
-        """Fit the encoder.
-
-        Args:
-            X (DataFrame): The input data.
-            y (Series): The target variable.
-        """
-
-        self.columns_ = list(select_columns(X, self.columns))
-        self.encoding_map_ = {}
-
-        X = self._handle_missing_values(X)
-
+    def check_target_type(self, y: IntoSeriesT) -> str:
+        if hasattr(self, "target_type_"):
+            return
         if not hasattr(self, "target_type") or self.target_type == "auto":
             self.target_type_ = infer_target_type(y)
         else:
@@ -69,6 +61,22 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
                 f"Invalid type of target '{self.target_type_}'. "
                 f"Allowed types are {self._allowed_types_of_target}."
             )
+
+    @nw.narwhalify
+    @check_X_y
+    def fit(self, X: IntoFrameT, y: IntoSeriesT) -> "BaseTargetEncoder":
+        """Fit the encoder.
+
+        Args:
+            X (DataFrame): The input data.
+            y (Series): The target variable.
+        """
+
+        self.check_target_type(y)
+        self.columns_ = list(select_columns(X, self.columns))
+        self.encoding_map_ = {}
+
+        X = self._handle_missing_values(X)
 
         if self.target_type_ == "binary":
             unique_classes = sorted(y.unique().to_list())
@@ -177,6 +185,45 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
                 for column in self.columns_
                 for class_ in self.unique_classes_
             ]
+
+    @nw.narwhalify
+    @check_X_y
+    def fit_transform(self, X: IntoFrameT, y: IntoSeriesT) -> "BaseTargetEncoder":
+        """Fit and transform the encoder.
+
+        Args:
+            X (DataFrame): The input data.
+            y (Series): The target variable.
+
+        Returns:
+            BaseTargetEncoder: The fitted encoder.
+        """
+        self.check_target_type(y)
+        if self.target_type_ in ("binary", "multiclass"):
+            X_folds = add_cv_fold_id_column_stratified_k_fold(
+                X, y, self.cv
+            ).with_row_index(name="index")
+        else:
+            X_folds = add_cv_fold_id_column_k_fold(X, self.cv)
+
+        X_folds_transformed = []
+        X_y_folds = X_folds.with_columns(target=y)
+        for fold_id in range(self.cv):
+            train = X_y_folds.filter(nw.col("fold_id") != fold_id)
+            test = X_folds.filter(nw.col("fold_id") == fold_id)
+
+            self.fit.__wrapped__.__wrapped__(self, train, train.get_column("target"))
+            X_folds_transformed.append(
+                self.transform.__wrapped__(self, test).drop("fold_id")
+            )
+
+        self.fit.__wrapped__.__wrapped__(self, X, y)
+        X_transformed = nw.concat(X_folds_transformed)
+        if self.target_type_ in ("binary", "multiclass"):
+            # sort by index to ensure the order is the same as the input
+            return X_transformed.sort(by="index").drop("index")
+        else:
+            return X_transformed
 
     def _transform_binary_continuous(
         self, X: nw.DataFrame, unseen_per_col: dict

@@ -1,8 +1,9 @@
-from typing import Literal, Sequence
+from typing import Any, Literal, Sequence, Tuple
 
 import narwhals as nw
 from narwhals.typing import IntoFrameT
-from pydantic import validate_call
+from pydantic import Field, validate_call
+from typing_extensions import Annotated
 
 from sklearo.encoding.base import BaseTargetEncoder
 
@@ -95,6 +96,7 @@ class TargetEncoder(BaseTargetEncoder):
         fill_values_underrepresented: float | None | Literal["mean"] = "mean",
         target_type: Literal["auto", "binary", "multiclass", "continuous"] = "auto",
         smooth: Literal["auto"] | float = "auto",
+        cv: Annotated[int, Field(ge=2)] = 5,
     ) -> None:
 
         self.columns = columns
@@ -105,6 +107,7 @@ class TargetEncoder(BaseTargetEncoder):
         self.smooth = smooth
         self.underrepresented_categories = underrepresented_categories
         self.fill_values_underrepresented = fill_values_underrepresented
+        self.cv = cv
 
     def _calculate_target_statistic(
         self, x_y: IntoFrameT, target_col: str, column: str
@@ -156,12 +159,12 @@ class TargetEncoder(BaseTargetEncoder):
                 x_y_grouped = x_y_grouped.filter(
                     ~nw.col(column).is_in(underrepresented_categories)
                 )
-                encoding_dict = {
+                fill_values_underrepresented_dict = {
                     category: fill_values_underrepresented
                     for category in underrepresented_categories
                 }
         else:
-            encoding_dict = {}
+            fill_values_underrepresented_dict = {}
 
         if self.smooth == "auto":
             var_target = x_y[target_col].var()
@@ -186,6 +189,6 @@ class TargetEncoder(BaseTargetEncoder):
             .rows()
         )
 
-        encoding_dict.update(dict(categories_encoding_as_list))
-
+        encoding_dict = dict(categories_encoding_as_list)
+        encoding_dict.update(fill_values_underrepresented_dict)
         return encoding_dict

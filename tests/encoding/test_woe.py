@@ -468,16 +468,40 @@ class TestWOEEncoder:
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
     def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
-        binary_class_data_df = DataFrame(binary_class_data)
 
-        encoder = WOEEncoder()
+        binary_class_data = DataFrame(
+            {
+                "category": binary_class_data["category"] * 2,
+                "target": binary_class_data["target"] * 2,
+            }
+        )
+        encoder = WOEEncoder(
+            cv=3,
+        )
         transformed = encoder.fit_transform(
-            binary_class_data_df[["category"]], binary_class_data_df["target"]
+            binary_class_data[["category"]], binary_class_data["target"]
         )
 
-        # Ensure that the transformed data is not None and has the expected shape
-        assert transformed is not None
-        assert transformed.shape[0] == binary_class_data_df.shape[0]
+        assert transformed["category"].to_list() == [
+            -0.8754687373539001,
+            -0.8754687373539001,
+            -0.8754687373539001,
+            0.5108256237659906,
+            0.5108256237659906,
+            0.5108256237659906,
+            0.22314355131420976,
+            0.7621400520468967,
+            0.7621400520468967,
+            -1.0296194171811583,
+            -1.0296194171811583,
+            -1.0296194171811583,
+            0.06899287148695142,
+            0.9444616088408515,
+            0.9444616088408515,
+            0.5389965007326869,
+            0.5389965007326869,
+            0.5389965007326869,
+        ]
 
     def test_woe_encoder_with_regression_target_type_raises_error(self, DataFrame):
         regression_data = {

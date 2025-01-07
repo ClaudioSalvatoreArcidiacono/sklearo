@@ -1,15 +1,12 @@
 import math
-import warnings
-from collections import defaultdict
-from typing import Any, Literal, Sequence
+from typing import Literal, Sequence
 
 import narwhals as nw
-from narwhals.typing import IntoFrameT, IntoSeriesT
-from pydantic import validate_call
+from narwhals.typing import IntoFrameT
+from pydantic import Field, validate_call
+from typing_extensions import Annotated
 
 from sklearo.encoding.base import BaseTargetEncoder
-from sklearo.utils import infer_target_type, select_columns
-from sklearo.validation import check_if_fitted, check_type_of_target, check_X_y
 
 
 class WOEEncoder(BaseTargetEncoder):
@@ -144,6 +141,7 @@ class WOEEncoder(BaseTargetEncoder):
         unseen: Literal["raise", "ignore"] = "raise",
         fill_value_unseen: float | None = 0.0,
         missing_values: Literal["encode", "ignore", "raise"] = "encode",
+        cv: Annotated[int, Field(ge=2)] = 5,
     ) -> None:
         self.columns = columns
         self.underrepresented_categories = underrepresented_categories
@@ -151,6 +149,7 @@ class WOEEncoder(BaseTargetEncoder):
         self.fill_values_underrepresented = fill_values_underrepresented or (None, None)
         self.unseen = unseen
         self.fill_value_unseen = fill_value_unseen
+        self.cv = cv
 
     def _calculate_target_statistic(
         self, x_y: IntoFrameT, target_col: str, column: str
