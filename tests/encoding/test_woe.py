@@ -13,10 +13,20 @@ class TestWOEEncoder:
 
     @pytest.fixture
     def binary_class_data(self):
+        # fmt: off
         data = {
-            "category": ["A", "A", "A", "B", "B", "B", "C", "C", "C"],
-            "target": [1, 0, 0, 1, 1, 0, 1, 1, 0],
+            "category": [
+                "A", "A", "A",
+                "B", "B", "B",
+                "C", "C", "C"
+            ],
+            "target": [
+                1, 0, 0,
+                1, 1, 0,
+                1, 1, 0
+            ],
         }
+        # fmt: off
         return data
 
     @pytest.fixture
@@ -157,6 +167,17 @@ class TestWOEEncoder:
         assert encoder.columns_ == ["category", "target"]
         assert "category" in encoder.encoding_map_
 
+    def test_woe_encoder_binary_raise_underrepresented_no_positives_in_category(
+        self, binary_class_data, DataFrame
+    ):
+        # Set the only positive target of category A to 0
+        binary_class_data["target"][0] = 0
+        binary_class_data = DataFrame(binary_class_data)
+        encoder = WOEEncoder(underrepresented_categories="raise")
+
+        with pytest.raises(ValueError, match="Underrepresented category"):
+            encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+
     def test_woe_encoder_fit_with_target_in_X_multi_class_raise_underrepresented(
         self, multi_class_data, DataFrame
     ):
@@ -186,6 +207,37 @@ class TestWOEEncoder:
 
     def test_woe_encoder_transform_binary(self, binary_class_data, DataFrame):
         binary_class_data = DataFrame(binary_class_data)
+        encoder = WOEEncoder()
+        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+        transformed = encoder.transform(binary_class_data[["category"]])
+
+        # for category A:
+        #   log((1/5)/(2/4)) = -0.916291...
+        # for categories B and C:
+        #   log((2/5)/(1/4)) = 0.470004...
+        expected_values = [
+            -0.916291,
+            -0.916291,
+            -0.916291,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
+            0.470004,
+        ]
+        np.testing.assert_allclose(
+            transformed["category"].to_list(), expected_values, rtol=1e-5
+        )
+        assert isinstance(transformed, DataFrame)
+
+    def test_woe_encoder_transform_binary_bool(self, binary_class_data, DataFrame):
+        binary_class_data = DataFrame(
+            {
+                "category": binary_class_data["category"],
+                "target": [bool(target) for target in binary_class_data["target"]],
+            }
+        )
         encoder = WOEEncoder()
         encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
         transformed = encoder.transform(binary_class_data[["category"]])

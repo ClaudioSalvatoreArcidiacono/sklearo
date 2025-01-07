@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from narwhals.typing import IntoFrameT, IntoSeriesT
 
 
-class BaseTransformer(ABC):
+class BaseTransformer(ABC):  # pragma: no cover
 
     @abstractmethod
     def fit(self, X: IntoFrameT, y: IntoSeriesT | None = None) -> None:

@@ -123,7 +123,7 @@ class TargetEncoder(BaseTargetEncoder):
         ):
             # rename the column to avoid conflict
             original_column_name = column
-            x_y = x_y.rename(columns={column: f"{column}_original"})
+            x_y = x_y.rename(mapping={column: f"{column}_original"})
             column = f"{column}_original"
         else:
             original_column_name = column

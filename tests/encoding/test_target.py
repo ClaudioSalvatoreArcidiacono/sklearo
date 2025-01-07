@@ -280,6 +280,63 @@ class TestTargetEncoder:
         )
         assert isinstance(transformed, DataFrame)
 
+    def test_target_encoder_transform_binary_reserved_column(
+        self, binary_class_data, DataFrame
+    ):
+        binary_class_data = DataFrame(
+            {
+                "smoothing": binary_class_data["category"],
+                "target": binary_class_data["target"],
+            }
+        )
+        encoder = TargetEncoder()
+        encoder.fit(binary_class_data[["smoothing"]], binary_class_data["target"])
+        transformed = encoder.transform(binary_class_data[["smoothing"]])
+
+        expected_values = [
+            0.396825,
+            0.396825,
+            0.396825,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+        ]
+        np.testing.assert_allclose(
+            transformed["smoothing"].to_list(), expected_values, rtol=1e-5
+        )
+        assert isinstance(transformed, DataFrame)
+        assert transformed.columns == ["smoothing"]
+
+    def test_target_encoder_transform_binary_bool(self, binary_class_data, DataFrame):
+        binary_class_data = DataFrame(
+            {
+                "category": binary_class_data["category"],
+                "target": [bool(target) for target in binary_class_data["target"]],
+            }
+        )
+        encoder = TargetEncoder()
+        encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
+        transformed = encoder.transform(binary_class_data[["category"]])
+
+        expected_values = [
+            0.396825,
+            0.396825,
+            0.396825,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+            0.634921,
+        ]
+        np.testing.assert_allclose(
+            transformed["category"].to_list(), expected_values, rtol=1e-5
+        )
+        assert isinstance(transformed, DataFrame)
+
     def test_target_encoder_transform_regression(self, regression_data, DataFrame):
         regression_data = DataFrame(regression_data)
         encoder = TargetEncoder()
@@ -650,7 +707,7 @@ class TestTargetEncoder:
         with pytest.raises(ValueError, match="y contains missing values."):
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
-    def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
+    def test_target_encoder_fit_transform(self, binary_class_data, DataFrame):
 
         binary_class_data = DataFrame(
             {
@@ -684,6 +741,42 @@ class TestTargetEncoder:
             0.6292134831460674,
             0.6292134831460674,
             0.6292134831460674,
+        ]
+
+    def test_target_encoder_fit_transform_set_smoothing(
+        self, binary_class_data, DataFrame
+    ):
+
+        binary_class_data = DataFrame(
+            {
+                "category": binary_class_data["category"] * 2,
+                "target": binary_class_data["target"] * 2,
+            }
+        )
+        encoder = TargetEncoder(cv=3, smooth=10)
+        transformed = encoder.fit_transform(
+            binary_class_data[["category"]], binary_class_data["target"]
+        )
+
+        assert transformed["category"].to_list() == [
+            0.49650349650349646,
+            0.49650349650349646,
+            0.49650349650349646,
+            0.5734265734265733,
+            0.5734265734265733,
+            0.5734265734265733,
+            0.5636363636363637,
+            0.6309523809523809,
+            0.6309523809523809,
+            0.5256410256410257,
+            0.5256410256410257,
+            0.5256410256410257,
+            0.588888888888889,
+            0.5989010989010989,
+            0.5989010989010989,
+            0.5680473372781065,
+            0.5680473372781065,
+            0.5680473372781065,
         ]
 
     def test_target_encoder_explicitly_set_target_type(

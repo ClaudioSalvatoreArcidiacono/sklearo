@@ -46,7 +46,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
         self, x_y: IntoFrameT, target_col: str, column: str
     ) -> dict[str, float | int | None]:
         """Calculate the target statistic for a column."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def check_target_type(self, y: IntoSeriesT) -> str:
         if hasattr(self, "target_type_"):
