@@ -1,5 +1,5 @@
 [![pytest](https://github.com/ClaudioSalvatoreArcidiacono/sklearo/workflows/Tests/badge.svg)](https://github.com/ClaudioSalvatoreArcidiacono/sklearo/actions?query=workflow%3A%22Tests%22)
- [![PyPI](https://img.shields.io/pypi/v/sklearo)](#)
+ [![PyPI](https://img.shields.io/pypi/v/sklearo)](https://pypi.org/project/sklearo/)
  [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://claudiosalvatorearcidiacono.github.io/sklearo/)
 
 # sklearo
