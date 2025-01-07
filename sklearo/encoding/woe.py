@@ -12,7 +12,7 @@ from sklearo.encoding.base import BaseTargetEncoder
 
 
 class WOEEncoder(BaseTargetEncoder):
-    """Weight of Evidence (WOE) Encoder with support for multiclass classification.
+    """Weight of Evidence (WOE) Encoder with support for **multiclass classification**.
 
     This class provides functionality to encode categorical features using the Weight of Evidence
     (WOE) technique. WOE is commonly used in credit scoring and other binary classification problems
