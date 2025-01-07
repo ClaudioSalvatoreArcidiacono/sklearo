@@ -1,3 +1,5 @@
+"""This module provides the Weight of Evidence (WoE) encoding techniques for categorical features."""
+
 import math
 from typing import Literal, Sequence
 
@@ -143,6 +145,7 @@ class WOEEncoder(BaseTargetEncoder):
         missing_values: Literal["encode", "ignore", "raise"] = "encode",
         cv: Annotated[int, Field(ge=2)] = 5,
     ) -> None:
+        """Initializes the WoEEncoder with the specified parameters."""
         self.columns = columns
         self.underrepresented_categories = underrepresented_categories
         self.missing_values = missing_values

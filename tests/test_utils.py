@@ -19,7 +19,6 @@ select_columns = nw.narwhalify(select_columns)
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
 class TestSelectColumns:
-
     @pytest.fixture
     def sample_data(self):
         data = {
@@ -81,7 +80,6 @@ class TestSelectColumns:
 
 @pytest.mark.parametrize("Series", [pd.Series, pl.Series], ids=["pandas", "polars"])
 class TestTypeOfTarget:
-
     @pytest.mark.parametrize(
         "data, expected",
         [

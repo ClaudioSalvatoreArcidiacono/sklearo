@@ -1,3 +1,5 @@
+"""Utility functions for the sklearo package."""
+
 import inspect
 import re
 from typing import Sequence
@@ -20,18 +22,21 @@ FLOAT_DTYPES = [nw.Float32, nw.Float64]
 
 
 def select_columns_by_regex_pattern(df: nw.DataFrame, pattern: str):
+    """Selects columns from the DataFrame that match the given regex pattern."""
     for column in df.columns:
         if re.search(pattern, column):
             yield column
 
 
 def select_columns_by_types(df: nw.DataFrame, dtypes: list[nw.dtypes.DType]):
+    """Selects columns from the DataFrame that match the specified data types."""
     for column, dtype in zip(df.schema.names(), df.schema.dtypes()):
         if dtype in dtypes:
             yield column
 
 
 def select_columns(df: nw.DataFrame, columns: Sequence[nw.typing.DTypes | str] | str):
+    """Selects specified columns from the DataFrame."""
     if isinstance(columns, str):
         yield from select_columns_by_regex_pattern(df, columns)
 

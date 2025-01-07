@@ -10,7 +10,6 @@ from sklearo.encoding.woe import WOEEncoder
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
 class TestWOEEncoder:
-
     @pytest.fixture
     def binary_class_data(self):
         # fmt: off
@@ -340,7 +339,7 @@ class TestWOEEncoder:
             missing_values="encode", underrepresented_categories="fill"
         )
         encoder.fit(multi_class_data[["category"]], multi_class_data["target"])
-        transformed = encoder.transform(multi_class_data[["category"]])
+        encoder.transform(multi_class_data[["category"]])
 
         assert "MISSING" in encoder.encoding_map_["category"][1]
 
@@ -520,7 +519,6 @@ class TestWOEEncoder:
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
     def test_woe_encoder_fit_transform(self, binary_class_data, DataFrame):
-
         binary_class_data = DataFrame(
             {
                 "category": binary_class_data["category"] * 2,

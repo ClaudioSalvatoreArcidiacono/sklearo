@@ -1,3 +1,5 @@
+"""This module provides cross-validation utilities for model evaluation."""
+
 import math
 
 import narwhals as nw
@@ -5,8 +7,7 @@ from narwhals.typing import IntoFrameT, IntoSeriesT
 
 
 def ceil_div(col: nw.Expr, divisor: int) -> nw.Expr:
-    """
-    Perform ceiling division on a column.
+    """Perform ceiling division on a column.
 
     This function divides each element in the given column by the specified divisor
     and returns the smallest integer greater than or equal to the result of the division.
@@ -22,8 +23,7 @@ def ceil_div(col: nw.Expr, divisor: int) -> nw.Expr:
 
 
 def add_cv_fold_id_column_k_fold(X: IntoFrameT, k: int = 5) -> IntoFrameT:
-    """
-    Add a column `fold_id` to the DataFrame indicating the fold ID for k-fold cross-validation.
+    """Add a column `fold_id` to the DataFrame indicating the fold ID for k-fold cross-validation.
 
     This function divides the input DataFrame into k folds, ensuring that each fold
     has approximately the same number of samples. The fold IDs are assigned in a way
@@ -82,8 +82,7 @@ def add_cv_fold_id_column_k_fold(X: IntoFrameT, k: int = 5) -> IntoFrameT:
 def add_cv_fold_id_column_stratified_k_fold(
     X: IntoFrameT, y: IntoSeriesT, k: int = 5
 ) -> IntoFrameT:
-    """
-    Add a `fold_id` column to the DataFrame indicating the fold ID for stratified k-fold CV.
+    """Add a `fold_id` column to the DataFrame indicating the fold ID for stratified k-fold CV.
 
     This function ensures that each fold has approximately the same proportion of each class
     as the original dataset. It calculates the fold IDs based on the distribution of the target

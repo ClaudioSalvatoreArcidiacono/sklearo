@@ -43,7 +43,6 @@ def test_target_encoder_fit_transform_comparison_with_scikit_learn():
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
 class TestTargetEncoder:
-
     @pytest.fixture
     def binary_class_data(self):
         data = {
@@ -708,7 +707,6 @@ class TestTargetEncoder:
             encoder.fit(binary_class_data[["category"]], binary_class_data["target"])
 
     def test_target_encoder_fit_transform(self, binary_class_data, DataFrame):
-
         binary_class_data = DataFrame(
             {
                 "category": binary_class_data["category"] * 2,
@@ -746,7 +744,6 @@ class TestTargetEncoder:
     def test_target_encoder_fit_transform_set_smoothing(
         self, binary_class_data, DataFrame
     ):
-
         binary_class_data = DataFrame(
             {
                 "category": binary_class_data["category"] * 2,

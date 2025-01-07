@@ -1,4 +1,6 @@
-from typing import Any, Literal, Sequence, Tuple
+"""TargetEncoder class for encoding categorical features using the Target Encoding technique."""
+
+from typing import Literal, Sequence
 
 import narwhals as nw
 from narwhals.typing import IntoFrameT
@@ -9,8 +11,7 @@ from sklearo.encoding.base import BaseTargetEncoder
 
 
 class TargetEncoder(BaseTargetEncoder):
-    """
-    Target Encoder for categorical features.
+    """Target Encoder for categorical features.
 
     This class provides functionality to encode categorical features using the Target Encoding
     technique. Target Encoding replaces each category with the mean of the target variable for that
@@ -50,6 +51,10 @@ class TargetEncoder(BaseTargetEncoder):
             - If `'binary'`, the target variable is binary.
             - If `'multiclass'`, the target variable is multiclass.
             - If `'continuous'`, the target variable is continuous.
+
+        smooth (float, Literal["auto"]): Smoothing parameter to avoid overfitting. If `'auto'`, the
+            smoothing parameter is calculated based on the variance of the target variable.
+
 
     Attributes:
         columns_ (list[str]): List of columns to be encoded, learned during fit.
@@ -98,7 +103,7 @@ class TargetEncoder(BaseTargetEncoder):
         smooth: Literal["auto"] | float = "auto",
         cv: Annotated[int, Field(ge=2)] = 5,
     ) -> None:
-
+        """Class constructor for TargetEncoder."""
         self.columns = columns
         self.missing_values = missing_values
         self.unseen = unseen
@@ -112,7 +117,6 @@ class TargetEncoder(BaseTargetEncoder):
     def _calculate_target_statistic(
         self, x_y: IntoFrameT, target_col: str, column: str
     ) -> dict:
-
         if column in (
             "count_per_category",
             "sum_target_per_category",

@@ -13,7 +13,6 @@ from sklearo.cv import (
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
 class TestCVFunctions:
-
     def test_add_cv_fold_id_column_k_fold(self, DataFrame):
         data = {
             "A": range(10),

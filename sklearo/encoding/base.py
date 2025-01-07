@@ -1,3 +1,5 @@
+"""Base classes for encoders."""
+
 import warnings
 from abc import abstractmethod
 from collections import defaultdict
@@ -15,14 +17,16 @@ from sklearo.validation import check_if_fitted, check_X_y
 
 
 class BaseOneToOneEncoder(BaseTransformer):
+    """Base class for one-to-one encoders."""
 
     def _handle_missing_values(self, X: IntoFrameT) -> IntoFrameT:
+        """Handles missing values in the input data."""
         if self.missing_values == "ignore":
             return X
         if self.missing_values == "raise":
             if max(X[self.columns_].null_count().row(0)) > 0:
                 raise ValueError(
-                    f"Some columns have missing values. "
+                    "Some columns have missing values. "
                     "Please handle missing values before encoding or set "
                     "missing_values to either 'ignore' or 'encode'."
                 )
@@ -40,6 +44,7 @@ class BaseOneToOneEncoder(BaseTransformer):
 
 
 class BaseTargetEncoder(BaseOneToOneEncoder):
+    """Abstract base class for target encoders."""
 
     @abstractmethod
     def _calculate_target_statistic(
@@ -49,6 +54,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
         raise NotImplementedError  # pragma: no cover
 
     def check_target_type(self, y: IntoSeriesT) -> str:
+        """Check the type of the target variable."""
         if hasattr(self, "target_type_"):
             return
         if not hasattr(self, "target_type") or self.target_type == "auto":
@@ -71,7 +77,6 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
             X (DataFrame): The input data.
             y (Series): The target variable.
         """
-
         self.check_target_type(y)
         self.columns_ = list(select_columns(X, self.columns))
         self.encoding_map_ = {}
@@ -163,7 +168,8 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
                 warnings.warn(
                     f"Unseen categories {unseen_per_col} found during transform. "
                     "Please handle unseen categories for example by using a RareLabelEncoder. "
-                    f"These categories will be encoded as {self.fill_value_unseen}."
+                    f"These categories will be encoded as {self.fill_value_unseen}.",
+                    stacklevel=2,
                 )
 
         if self.target_type_ in ("binary", "continuous"):
@@ -174,6 +180,7 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
 
     @check_if_fitted
     def get_feature_names_out(self) -> list[str]:
+        """Get the output feature names."""
         if self.target_type_ in ("binary", "continuous"):
             return self.feature_names_in_
 

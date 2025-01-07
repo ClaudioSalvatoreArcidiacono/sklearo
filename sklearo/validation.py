@@ -1,9 +1,11 @@
-from functools import wraps
+"""Validation utilities for sklearo."""
 
-from sklearo.utils import infer_target_type
+from functools import wraps
 
 
 def check_X_y(func):
+    """Decorator to check the input data X and y."""
+
     @wraps(func)
     def wrapper(self, X, y, *args, **kwargs):
         if not X.shape[0] == y.shape[0]:
@@ -22,6 +24,8 @@ def check_X_y(func):
 
 
 def check_if_fitted(func):
+    """Decorator to check if the model is fitted before calling the method."""
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         if not any(
