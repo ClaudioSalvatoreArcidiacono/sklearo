@@ -49,6 +49,21 @@ class WOEEncoder(BaseTargetEncoder):
     The WOE encoding is useful for logistic regression and other linear models, as it transforms
     the categorical variables into continuous variables that can be used as input features.
 
+    Notes:
+        ## Cross-fitting 🏋️‍♂️
+
+        This implementation uses an internal cross-fitting strategy to calculate the WOE values for
+        the `fit_transform` method. **This means that calling `.fit(X, y).transform(X)` will not
+        return the same result as calling `.fit_transform(X, y)`.** When calling `.fit_transform(X,
+        y)`, the dataset is initially split into k folds (configurable via the `cv` parameter) then
+        for each fold the WOE values are calculated using the data from all other folds. Finally,
+        the transformer is fitted on the entire dataset. This is done to prevent leakage of
+        the target information into the training data. This idea has been taken from [scikit-learn's
+        implementation of
+        TargetEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html).
+        The reader is encouraged to learn more about cross-fitting on the [scikit-learn
+        documentation](https://scikit-learn.org/stable/auto_examples/preprocessing/plot_target_encoder_cross_val.html#sphx-glr-auto-examples-preprocessing-plot-target-encoder-cross-val-py).
+
     Args:
         columns (str, list[str], list[nw.typing.DTypes]): list of columns to encode.
 
@@ -91,12 +106,12 @@ class WOEEncoder(BaseTargetEncoder):
             - If `'ignore'`, missing values are left as is.
             - If `'raise'`, an error is raised when missing values are found.
 
+        cv (int): Number of cross-validation folds to use when calculating the WOE.
+
     Attributes:
         columns_ (list[str]): List of columns to be encoded, learned during fit.
         encoding_map_ (dict[str, dict[str, float]]): Nested dictionary mapping columns to their WOE
             values for each class, learned during fit.
-        is_zero_one_target_ (bool): Whether the target variable is exactly 0 or 1 or not,
-            learned during fit.
         feature_names_in_ (list[str]): List of feature names seen during fit.
 
     Examples:

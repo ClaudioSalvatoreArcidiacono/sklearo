@@ -18,6 +18,24 @@ class TargetEncoder(BaseTargetEncoder):
     category. This method is particularly useful for handling categorical variables in machine
     learning models, especially when the number of categories is large.
 
+    The mean target per category is blended with the overall mean target using a smoothing
+    parameter. The smoothing parameter is calculated as explained [here](https://scikit-learn.org/1.5/modules/preprocessing.html#target-encoder).
+
+    Notes:
+        ## Cross-fitting 🏋️‍♂️
+
+        This implementation uses an internal cross-fitting strategy to calculate the mean target
+        values for the `fit_transform` method. **This means that calling `.fit(X, y).transform(X)`
+        will not return the same result as calling `.fit_transform(X, y)`.** When calling
+        `.fit_transform(X, y)`, the dataset is initially split into k folds (configurable via the
+        `cv` parameter) then for each fold the mean target values are calculated using the data from
+        all other folds. Finally, the transformer is fitted on the entire dataset. This is done to
+        prevent leakage of the target information into the training data. This idea has been taken
+        from [scikit-learn's implementation of
+        TargetEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html).
+        The reader is encouraged to learn more about cross-fitting on the [scikit-learn
+        documentation](https://scikit-learn.org/stable/auto_examples/preprocessing/plot_target_encoder_cross_val.html#sphx-glr-auto-examples-preprocessing-plot-target-encoder-cross-val-py).
+
     Args:
         columns (str, list[str], list[nw.typing.DTypes]): List of columns to encode.
 
@@ -44,6 +62,15 @@ class TargetEncoder(BaseTargetEncoder):
             - If `'ignore'`, missing values are left as is.
             - If `'raise'`, an error is raised when missing values are found.
 
+        underrepresented_categories (str): Strategy to handle categories that are underrepresented in
+            the training data.
+
+            - If `'raise'`, an error is raised when underrepresented categories are found.
+            - If `'fill'`, underrepresented categories are filled with a specified fill value.
+
+        fill_values_underrepresented (float, None | Literal["mean"]): Fill value to use for underrepresented
+            categories. Defaults to `"mean"`, which will use the mean of the target variable.
+
         target_type (str): Type of the target variable.
 
             - If `'auto'`, the type is inferred from the target variable using
@@ -54,6 +81,9 @@ class TargetEncoder(BaseTargetEncoder):
 
         smooth (float, Literal["auto"]): Smoothing parameter to avoid overfitting. If `'auto'`, the
             smoothing parameter is calculated based on the variance of the target variable.
+
+        cv (int): Number of cross-validation folds to use for calculating the target encoding.
+
 
 
     Attributes:

@@ -196,7 +196,12 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
     @nw.narwhalify
     @check_X_y
     def fit_transform(self, X: IntoFrameT, y: IntoSeriesT) -> "BaseTargetEncoder":
-        """Fit and transform the encoder.
+        """Fit the encoder and transform the dataframe using cross-fitting.
+
+        Notes:
+            Due to the cross fitting nature of target encoding, the `fit_transform` method
+            is **NOT** equivalent to calling `fit` followed by `transform`. Please refer to
+            the [note on cross fitting](.).
 
         Args:
             X (DataFrame): The input data.
