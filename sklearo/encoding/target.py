@@ -120,7 +120,7 @@ class TargetEncoder(BaseTargetEncoder):
     @validate_call(config=dict(arbitrary_types_allowed=True))
     def __init__(
         self,
-        columns: Sequence[nw.typing.DTypes | str] | str = (
+        columns: Sequence[type | str] | str = (
             nw.Categorical,
             nw.String,
         ),
