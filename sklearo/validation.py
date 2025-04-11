@@ -8,6 +8,11 @@ def check_X_y(func):
 
     @wraps(func)
     def wrapper(self, X, y, *args, **kwargs):
+        if y is None:
+            raise ValueError(
+                "This estimator requires y to be passed, but the target y is None"
+            )
+
         if not X.shape[0] == y.shape[0]:
             raise ValueError(
                 f"X and y must have the same number of samples, but got X.shape={X.shape} and "

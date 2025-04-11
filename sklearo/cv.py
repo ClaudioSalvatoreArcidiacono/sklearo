@@ -117,7 +117,7 @@ def add_cv_fold_id_column_stratified_k_fold(
     return (
         X.with_columns(one=nw.lit(1), target=y)
         .with_columns(
-            count_per_class=nw.len().over("target"),
+            count_per_class=nw.col("one").count().over("target"),
             row_number_per_class=nw.col("one").cum_count().over("target"),
         )
         .with_columns(
