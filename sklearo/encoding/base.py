@@ -225,9 +225,8 @@ class BaseTargetEncoder(BaseOneToOneEncoder):
             test = X_folds.filter(nw.col("fold_id") == fold_id)
 
             self.fit.__wrapped__.__wrapped__(self, train, train.get_column("target"))
-            X_folds_transformed.append(
-                self.transform.__wrapped__(self, test).drop("fold_id")
-            )
+            transformed_test = self.transform.__wrapped__.__wrapped__(self, test)
+            X_folds_transformed.append(transformed_test.drop("fold_id"))
 
         self.fit.__wrapped__.__wrapped__(self, X, y)
         X_transformed = nw.concat(X_folds_transformed)

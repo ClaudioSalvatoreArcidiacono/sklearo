@@ -39,6 +39,24 @@ def test_target_encoder_fit_transform_comparison_with_scikit_learn():
     )
 
 
+def test_set_output():
+    # Test the set_output method of TargetEncoder
+    encoder = TargetEncoder()
+    X = np.array([["dog"] * 20 + ["cat"] * 30 + ["snake"] * 38], dtype=object).T
+    y = [90.3] * 5 + [80.1] * 15 + [20.4] * 5 + [20.1] * 25 + [21.2] * 8 + [49] * 30
+
+    X = pd.DataFrame({"col": X[:, 0]})
+    y = pd.Series(y)
+
+    encoder.fit(X, y)
+    transformed = encoder.transform(X)
+    assert isinstance(transformed, pd.DataFrame)
+
+    encoder.set_output(transform="polars")
+    transformed = encoder.transform(X)
+    assert isinstance(transformed, pl.DataFrame)
+
+
 @pytest.mark.parametrize(
     "DataFrame", [pd.DataFrame, pl.DataFrame], ids=["pandas", "polars"]
 )
