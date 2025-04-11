@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
+from sklearn.base import clone
 
 from sklearo.encoding import TargetEncoder
 
@@ -55,6 +56,13 @@ def test_set_output():
     encoder.set_output(transform="polars")
     transformed = encoder.transform(X)
     assert isinstance(transformed, pl.DataFrame)
+
+
+def test_clone():
+    encoder = TargetEncoder()
+    cloned = clone(encoder)
+    assert isinstance(cloned, TargetEncoder)
+    assert cloned.get_params() == encoder.get_params()
 
 
 @pytest.mark.parametrize(
