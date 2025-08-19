@@ -673,7 +673,7 @@ name = "importlib-metadata"
 version = "8.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/76/66/650a33bd90f786193e4de4b3ad86ea60b53c89b669a5c7be931fac31cdb0/importlib_metadata-8.7.0.tar.gz", hash = "sha256:d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000", size = 56641, upload-time = "2025-04-27T15:29:01.736Z" }
 wheels = [
@@ -2812,7 +2812,7 @@ wheels = [
 
 [[package]]
 name = "sklearo"
-version = "0.2.4"
+version = "0.2.5"
 source = { editable = "." }
 dependencies = [
     { name = "narwhals" },
@@ -2821,7 +2821,7 @@ dependencies = [
     { name = "scikit-learn", version = "1.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 build = [
     { name = "build" },
     { name = "twine" },
@@ -2847,25 +2847,32 @@ doc = [
 
 [package.metadata]
 requires-dist = [
-    { name = "black", marker = "extra == 'dev'" },
-    { name = "build", marker = "extra == 'build'" },
-    { name = "mkdocs", marker = "extra == 'doc'" },
-    { name = "mkdocs-jupyter", marker = "extra == 'doc'" },
-    { name = "mkdocs-material", marker = "extra == 'doc'" },
-    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'doc'" },
     { name = "narwhals", specifier = ">=1.20.1" },
-    { name = "numpy", marker = "extra == 'dev'" },
-    { name = "pandas", marker = "extra == 'dev'" },
-    { name = "polars", marker = "extra == 'dev'" },
-    { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pydantic", specifier = ">=2.0.0,<3.0.0" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'dev'" },
     { name = "scikit-learn" },
-    { name = "twine", marker = "extra == 'build'" },
 ]
-provides-extras = ["dev", "doc", "build"]
+
+[package.metadata.requires-dev]
+build = [
+    { name = "build" },
+    { name = "twine" },
+]
+dev = [
+    { name = "black" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "polars" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+doc = [
+    { name = "mkdocs" },
+    { name = "mkdocs-jupyter" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings", extras = ["python"] },
+]
 
 [[package]]
 name = "soupsieve"
