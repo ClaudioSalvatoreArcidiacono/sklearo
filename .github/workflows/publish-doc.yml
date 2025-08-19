@@ -2,7 +2,7 @@ name: Update Documentation
 on:
   push:
     tags:
-    - '*'
+      - "*"
 jobs:
   build-n-publish:
     permissions:
@@ -10,15 +10,15 @@ jobs:
     name: Update Documentation
     runs-on: ubuntu-latest
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: Set up uv with Python 3.10
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.10"
 
-    - name: Publish Documentation to github pages
-      run: |
-        pip install '.[doc]'
-        mkdocs gh-deploy --force --clean --verbose
+      - name: Publish Documentation to github pages
+        run: |
+          uv sync --group doc
+          uv run mkdocs gh-deploy --force --clean --verbose
