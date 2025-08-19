@@ -3,10 +3,12 @@
 ## Installing dev dependencies
 
 ```bash
-# Create a new virtual environment
-python -m venv venv
-# Activate the virtual environment
-source venv/bin/activate
-# Install the dependencies
-make env-install
+# Install uv (one time)
+curl -fsSL https://astral.sh/uv/install.sh | sh
+
+# Install dependencies (creates .venv in the project)
+uv sync --extra dev
+
+# Run tests
+uv run pytest
 ```

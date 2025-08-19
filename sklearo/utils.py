@@ -35,7 +35,7 @@ def select_columns_by_types(df: nw.DataFrame, dtypes: list[nw.dtypes.DType]):
             yield column
 
 
-def select_columns(df: nw.DataFrame, columns: Sequence[nw.typing.DTypes | str] | str):
+def select_columns(df: nw.DataFrame, columns: Sequence[nw.dtypes.DType | str] | str):
     """Selects specified columns from the DataFrame."""
     if isinstance(columns, str):
         yield from select_columns_by_regex_pattern(df, columns)
@@ -99,6 +99,10 @@ def infer_target_type(y: IntoSeriesT) -> str:
         "binary"
 
     """
+    # Handle degenerate cases early
+    if y.is_null().all():
+        return "unknown"
+
     if y.dtype == nw.Boolean:
         return "binary"
 
