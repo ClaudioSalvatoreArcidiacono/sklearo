@@ -10,7 +10,7 @@ A versatile Python package featuring scikit-learn like transformers for feature 
 
 ## Installation
 
-To install the package, use pip:
+Install from PyPI:
 
 ```bash
 pip install sklearo
