@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://claudiosalvatorearcidiacono.github.io/sklearo/</loc>
+         <lastmod>2025-08-19</lastmod>
+    </url>
+    <url>
+         <loc>https://claudiosalvatorearcidiacono.github.io/sklearo/API/encoding/TargetEncoder/</loc>
+         <lastmod>2025-08-19</lastmod>
+    </url>
+    <url>
+         <loc>https://claudiosalvatorearcidiacono.github.io/sklearo/API/encoding/WOEEncoder/</loc>
+         <lastmod>2025-08-19</lastmod>
+    </url>
+    <url>
+         <loc>https://claudiosalvatorearcidiacono.github.io/sklearo/API/utils/infer_target_type/</loc>
+         <lastmod>2025-08-19</lastmod>
+    </url>
+</urlset>
